@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>صراع الأرض: خريطة المملكة</title>
+<title>صراع الأرض</title>
 <style>
 :root{--bg:#e8eef0;--fg:#13262d;--card:#fff;--ac:#0f6b6b;--bd:#b9c9ce;--mut:#5b727a;--sea:#cfe1ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1a20;--fg:#e3eef0;--card:#162830;--ac:#4cc3b5;--bd:#2d4752;--mut:#8fb0b8;--sea:#10252e}}
@@ -300,7 +300,7 @@ function start(n){
 }
 function nextRound(){
  S.sel=S.tgt=null;S.r++;if(S.max&&S.r>S.max)return finish();
- S.q=QS[(S.r-1)%QS.length];S.gs=[];S.gi=0;S.ph="q";S.msg="";
+ if(!QS.length)QS=shuf(Q);S.q=QS[(S.r-1)%QS.length];S.gs=[];S.gi=0;S.ph="q";S.msg="";
  if(S.multi){S.bots.forEach((b,p)=>{if(b&&alive(p))S.gs[p]=botGuess(p)});while(!alive(S.gi))S.gi++}else skipBots();
  if(!S.multi&&S.gi>=S.n)return results();render();
 }
@@ -317,7 +317,7 @@ function guess(v,seat,to){
 }
 function results(){
  const a=S.q[1],ps=[...Array(S.n).keys()].filter(alive).map(p=>({p,d:isNaN(S.gs[p])?Infinity:Math.abs(S.gs[p]-a)})).sort((x,y)=>x.d-y.d);
- ps.forEach(x=>{x.c=x.d==Infinity?0:Math.max(0,1-x.d/(S.q[2]||Math.abs(a)));x.pts=Math.floor(x.c*10+1e-9);S.P[x.p].res+=x.pts});
+ S.cl=[];ps.forEach(x=>{x.c=x.d==Infinity?0:Math.max(0,1-x.d/(S.q[2]||Math.abs(a)));S.cl[x.p]=x.c;x.pts=Math.floor(x.c*10+1e-9);S.P[x.p].res+=x.pts});
  const mx=Math.max(...ps.map(x=>x.pts));S.champ=mx>0?ps.filter(x=>x.pts==mx).map(x=>x.p):[];
  S.rt=ps;S.ph="qr";render();
 }
@@ -366,8 +366,9 @@ const nbr=i=>{const o=[];for(let j=0;j<N;j++)if(ADJ[i][j])o.push(j);return o};
 const lv=c=>S.lv&&S.lv[c]!=null?S.lv[c]:(S.diff||0);
 function botGuess(p){const a=S.q[1],sc=S.q[2]||Math.abs(a),pw=S.pw&&S.pw[p]!=null?S.pw[p]:[.42,.6,.78][lv(p)],w=Math.cos(2*Math.PI*((S.r-1)/7+p*.13))*.22,c=Math.max(.05,Math.min(.99,pw+w+(Math.random()-.5)*.1));return Math.abs(Math.round(a+(Math.random()<.5?-1:1)*(1-c)*sc))}
 function skipBots(){while(S.gi<S.n&&(!alive(S.gi)||S.bots[S.gi])){if(alive(S.gi))S.gs[S.gi]=botGuess(S.gi);S.gi++}}
+const wins=(n,da,att,def)=>n>da||(n==da&&((S.cl||[])[att]||0)>((S.cl||[])[def]||0));
 function botVal(c,j){let v=1+1.5/(S.A[j]+1)+.01*cnt(S.T[j]);if(S.mode=="cap"){if(S.cap.includes(j))v+=4;if(nbr(j).includes(S.cap[c]))v+=.8}return v}
-function botNeed(c,j){const bA=S.champ.includes(c)?1:0,bD=S.champ.includes(S.T[j])?1:0;return Math.max(1,S.A[j]+bD-bA+1)}
+function botNeed(c,j){const da=S.A[j];return Math.max(1,wins(da,da,c,S.T[j])?da:da+1)}
 function botDeploy(c,own){
  const bd=own.filter(i=>nbr(i).some(j=>S.T[j]!=c));
  if(!bd.length)return own[Math.floor(Math.random()*own.length)];
@@ -411,7 +412,7 @@ function restore(){
  }
  render();
 }
-function cfInfo(n){const a=S.sel,d=S.tgt,sa=S.A[a]-n;if(S.ph=="attack"){const bA=S.champ.includes(S.cur)?1:0,bD=S.champ.includes(S.T[d])?1:0,da=S.A[d],win=n+bA>da+bD;return{sa,sd:win?Math.max(1,n-da):Math.max(1,da-Math.floor(n/2)),win}}return{sa,sd:S.A[d]+n,win:1}}
+function cfInfo(n){const a=S.sel,d=S.tgt;if(S.ph=="attack"){const da=S.A[d],win=wins(n,da,S.cur,S.T[d]),k=Math.ceil(n/2);return win?{sa:S.A[a]-n,sd:Math.max(1,n-da),win}:{sa:S.A[a]-k,sd:Math.max(1,da-k),win}}return{sa:S.A[a]-n,sd:S.A[d]+n,win:1}}
 function cfSet(v){const m=S.A[S.sel]-1;CFN=Math.max(1,Math.min(m,Math.round(v)));const i=cfInfo(CFN),e=$("cfn"),x=$("cfa"),y=$("cfd"),r=$("cfr");if(e)e.textContent=CFN;if(x)x.textContent=i.sa;if(y){y.textContent=i.sd;y.className=i.win?"w":"l"}if(r)r.value=CFN}
 function cfHTML(){const a=S.sel,d=S.tgt,m=S.A[a]-1,at=S.ph=="attack",k=S.ph+a+">"+d;
  if(k!=cfKey){cfKey=k;CFN=at?Math.min(m,botNeed(S.cur,d)):m}CFN=Math.max(1,Math.min(m,CFN));const i=cfInfo(CFN);
@@ -419,9 +420,8 @@ function cfHTML(){const a=S.sel,d=S.tgt,m=S.A[a]-1,at=S.ph=="attack",k=S.ph+a+">
 const cfOk=()=>act(S.ph=="attack"?"atk":"mv"),cfNo=()=>act("undo");
 function atk(n){
  const a=S.sel,d=S.tgt,da=S.A[d];
- const bA=S.champ.includes(S.cur)?1:0,bD=S.champ.includes(S.T[d])?1:0;
- if(n+bA>da+bD){S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${PN[S.cur]} على ${R[d].n}.`}
- else{S.A[a]-=n;S.A[d]=Math.max(1,da-Math.floor(n/2));S.msg=`فشل الهجوم على ${R[d].n}: خسرت ${n} جيش.`}
+  if(wins(n,da,S.cur,S.T[d])){S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${PN[S.cur]} على ${R[d].n}.`}
+ else{{const k=Math.ceil(n/2);S.A[a]-=k;S.A[d]=Math.max(1,da-k);S.msg=`فشل الهجوم على ${R[d].n}: خسر الطرفان ${k} جيش.`}}
  S.ev={id:(S.ev?S.ev.id:0)+1,t:S.msg,c:S.cur};S.sel=S.tgt=null;if(!win())render();
 }
 const armies=p=>S.A.reduce((s,a,i)=>s+(S.T[i]==p?a:0),0);
@@ -470,14 +470,14 @@ function render(){const e=$("gv"),v=e?e.value:"",f0=e&&document.activeElement==e
 function render0(){
  const app=$("app");DOCK="";
  if(!S&&NET.role)return lobby();
- if(!S){app.innerHTML=`<div class="side"><div class="card"><h2>صراع الأرض: خريطة المملكة</h2><p>حرب بلا نرد ولا حظ: جيوشك تأتيك من معرفتك.</p><p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}<p>هدف الفوز: <select id="md" style="width:auto"><option value="all">احتلال جميع المناطق</option><option value="c5">احتلال 5 مناطق فوق ما تملك</option><option value="c8" selected>احتلال 8 مناطق فوق ما تملك</option><option value="c12">احتلال 12 منطقة فوق ما تملك</option><option value="a40">زيادة 40 جيشاً فوق ما تملك</option><option value="a80">زيادة 80 جيشاً فوق ما تملك</option><option value="a120">زيادة 120 جيشاً فوق ما تملك</option><option value="cap">احتلال العواصم</option></select></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>12</option><option selected>20</option><option>30</option><option value="0">لا نهائية</option></select></p><p>عدد اللاعبين الكلي: <select id="pn" style="width:auto">${[2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select></p><button onclick="start(+$('pn').value)">ابدأ اللعب</button><hr><p>أو العب أونلاين على عدة أجهزة:</p><button class="s" onclick="host()">إنشاء غرفة</button> <input id="rc" placeholder="كود الغرفة" style="width:100px"> <button class="s" onclick="join($('rc').value)">انضمام</button></div></div><div class="mapw">${(S={T:R.map((_,i)=>i%4),A:R.map(()=>"")},mapSvg())}</div>`;S=null;return}
+ if(!S){app.innerHTML=`<div class="side"><div class="card"><h2>صراع الأرض</h2><p>جيوشك تأتيك من معرفتك.</p><p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}<p>هدف الفوز: <select id="md" style="width:auto"><option value="all">احتلال جميع المناطق</option><option value="c5">احتلال 5 مناطق فوق ما تملك</option><option value="c8" selected>احتلال 8 مناطق فوق ما تملك</option><option value="c12">احتلال 12 منطقة فوق ما تملك</option><option value="a40">زيادة 40 جيشاً فوق ما تملك</option><option value="a80">زيادة 80 جيشاً فوق ما تملك</option><option value="a120">زيادة 120 جيشاً فوق ما تملك</option><option value="cap">احتلال العواصم</option></select></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>12</option><option selected>20</option><option>30</option><option value="0">لا نهائية</option></select></p><p>عدد اللاعبين الكلي: <select id="pn" style="width:auto">${[2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select></p><button onclick="start(+$('pn').value)">ابدأ اللعب</button><hr><p>أو العب أونلاين على عدة أجهزة:</p><button class="s" onclick="host()">إنشاء غرفة</button> <input id="rc" placeholder="كود الغرفة" style="width:100px"> <button class="s" onclick="join($('rc').value)">انضمام</button></div></div><div class="mapw">${(S={T:R.map((_,i)=>i%4),A:R.map(()=>"")},mapSvg())}</div>`;S=null;return}
  if(S.ph=="end"){if(lastEnd!=S.r+"w"){lastEnd=S.r+"w";SND.win()}app.innerHTML=`<div class="side"><div class="card"><h2>الفائز: ${PN[S.w]}</h2><p>يحكم ${cnt(S.w)} من ${N} منطقة.</p><button onclick="leave()">لعبة جديدة</button></div></div>${mapw()}`;return}
  const key=S.ph+S.cur+S.gi+S.r;if(S.key!=key){S.key=key;S.t=L()[S.ph]||0;askSkip=false}
  const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
  const h0=h;
  if(S.ph=="q"&&S.multi)modal=qm();
  else if(S.ph=="q")modal=`<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p><p><span class="dot" style="background:${PC[S.gi]}"></span><b>${PN[S.gi]}</b>، اكتب تقديرك سراً ولا ينظر غيرك:</p><input id="gv" type="password" inputmode="decimal" autocomplete="off"> <button onclick="act('guess')">تأكيد</button><div class="msg">${S.msg}</div></div>`;
- else if(S.ph=="qr")modal=`<div class="card"><h3>الجواب: ${S.q[1]}</h3><table><tr><th>اللاعب</th><th>تقديره</th><th>القرب</th><th>جيوش</th></tr>${S.rt.map(x=>`<tr><td>${PN[x.p]}</td><td>${S.gs[x.p]==null||isNaN(S.gs[x.p])?"—":S.gs[x.p]}</td><td>${Math.round(x.c*100)}%</td><td>+${x.pts}${x.d==0?" 🎯":""}</td></tr>`).join("")}</table><p style="color:var(--mut);font-size:12px">الأقرب جواباً يأخذ <b>وسام الحكمة</b>: +1 في كل معركة هذه الجولة.</p>${S.tm?"<p>تبدأ الأدوار تلقائياً عند انتهاء المؤقت.</p>":!S.multi||NET.role=="host"?`<button onclick="act('begin')">ابدأ الأدوار</button>`:"<p>بانتظار المضيف...</p>"}</div>`;
+ else if(S.ph=="qr")modal=`<div class="card"><h3>الجواب: ${S.q[1]}</h3><table><tr><th>اللاعب</th><th>تقديره</th><th>القرب</th><th>جيوش</th></tr>${S.rt.map(x=>`<tr><td>${PN[x.p]}</td><td>${S.gs[x.p]==null||isNaN(S.gs[x.p])?"—":S.gs[x.p]}</td><td>${Math.round(x.c*100)}%</td><td>+${x.pts}${x.d==0?" 🎯":""}</td></tr>`).join("")}</table><p style="color:var(--mut);font-size:12px">الأقرب جواباً يأخذ <b>وسام الحكمة</b> 🏅: إذا تعادلت جيوشك مع جيوش خصمك في معركة يفوز الأقرب جواباً منكما.</p>${S.tm?"<p>تبدأ الأدوار تلقائياً عند انتهاء المؤقت.</p>":!S.multi||NET.role=="host"?`<button onclick="act('begin')">ابدأ الأدوار</button>`:"<p>بانتظار المضيف...</p>"}</div>`;
  else if(!my)h+=`<div class="card"><h3>دور ${PN[S.cur]}</h3><p>${S.bots&&S.bots[S.cur]?"🤖 الحاسوب يلعب":"انتظر دورك"}... ${nm(S.cur)}.</p><div class="msg">${S.msg}</div></div>`;
  else if(S.ph=="deploy")h+=`<div class="card"><h3>دور ${PN[S.cur]}: التوزيع</h3><div class="msg">${S.msg}</div><p>اضغط على أرضك لإضافة جيش. المتبقي: <b>${p.res}</b></p></div>`;
  else if(S.ph=="fortify"){h+=`<div class="card"><h3>دور ${PN[S.cur]}: إعادة التمركز</h3><p style="color:var(--mut)">انقل جيوشاً من أرضك إلى أرض أخرى لك متصلة بها عبر أراضيك (نقلة واحدة). أخضر = المصدر، أزرق = الوجهة.</p>`;
@@ -492,7 +492,7 @@ function render0(){
  let dock="";
  if(["deploy","attack","fortify"].includes(S.ph)){dock=h.slice(h0.length);h=h0;dock+=(S.tm&&L()[S.ph]?`<span class="dkt">⏱ <b class="tmv">${S.t}</b> ث</span><div class="tb"><i class="tbar" style="width:${S.t/L()[S.ph]*100}%"></i></div>`:"")+(my?skH():"")}
  if(botAsk>=0&&NET.role=="host")modal=`<div class="card"><h3>تحويل ${PN[botAsk]} إلى حاسوب</h3><p>اختر مستواه:</p><button onclick="toBot(botAsk,0)">سهل</button><button onclick="toBot(botAsk,1)">متوسط</button><button onclick="toBot(botAsk,2)">صعب</button><button class="s" onclick="botAsk=-1;render()">إلغاء</button></div>`;
- h+=`<details><summary>القواعد</summary>سؤال رقمي كل جولة: كل 10% من نسبة قربك من الجواب الصحيح = جيش (قرب 20% يعطي جيشين، والجواب الدقيق 100% يعطي 10، وأقل من 10% لا شيء). في بداية دورك تأخذ جيشاً لكل 3 مناطق (حداً أدنى 2). تُرسل n جيشاً: إن زادت على مدافعي المنطقة استوليت عليها وبقي لك الفرق، وإلا فنيت وخسر المدافع نصفها. المناطق المتجاورة هي التي تتشارك حدّاً على الخريطة. التوقيت: الأزمنة من إعدادات البداية (الافتراضي: سؤال 30ث، نتيجة 20ث ثم تبدأ الأدوار تلقائياً، توزيع 45ث، هجوم 60ث، تمركز 30ث)؛ عند انتهاء الوقت تُوزَّع الجيوش تلقائياً ويُنتقل للمرحلة التالية، ومن لم يجب لا يأخذ جيوشاً.</details>`;
+ h+=`<details><summary>القواعد</summary>سؤال رقمي كل جولة: كل 10% من نسبة قربك من الجواب الصحيح = جيش (قرب 20% يعطي جيشين، والجواب الدقيق 100% يعطي 10، وأقل من 10% لا شيء). في بداية دورك تأخذ جيشاً لكل 3 مناطق (حداً أدنى 2). تُرسل n جيشاً: إن زادت على مدافعي المنطقة (وعند التعادل يفوز الأقرب جواباً في سؤال الجولة وإلا فالمدافع) استوليت عليها وبقي لك الفرق، وإلا خسر الطرفان بالتساوي نصف ما أُرسل. المناطق المتجاورة هي التي تتشارك حدّاً على الخريطة. التوقيت: الأزمنة من إعدادات البداية (الافتراضي: سؤال 30ث، نتيجة 20ث ثم تبدأ الأدوار تلقائياً، توزيع 45ث، هجوم 60ث، تمركز 30ث)؛ عند انتهاء الوقت تُوزَّع الجيوش تلقائياً ويُنتقل للمرحلة التالية، ومن لم يجب لا يأخذ جيوشاً.</details>`;
  const mk=S.ph+"|"+S.r+"|"+(S.multi?"":S.gi),an=mk!=lastMk;lastMk=mk;
  const cf=(S.ph=="attack"||S.ph=="fortify")&&my&&S.sel!=null&&S.tgt!=null?cfHTML():"";
  DOCK=dock?`<div class="dock">${dock}</div>`:"";
