@@ -233,6 +233,7 @@ function host(){
  if(!S)lobby();
 }
 function onData(d){
+ if(NET.role=="host")return;
  NET.age=0;
  if(d.t=="hello"){NET.seat=d.seat;NET.joined=1;try{sessionStorage.setItem("asrseat",d.seat)}catch(e){}if(!S)lobby()}
  else if(d.t=="state"){S=d.S;NET.ep=S.ep||0;render()}
@@ -277,9 +278,9 @@ function becomeHost(ep){
  pr.on("connection",onConn);
  render();
 }
-function hostXfer(){
+function hostXfer(needActive){
  if(NET.role!="host"||!S||!S.multi||S.ph=="end")return;
- const c=[...Array(S.n).keys()].filter(p=>p!=S.hs&&alive(p)&&!S.bots[p]&&NET.conns[p]&&NET.conns[p].open).sort((a,b)=>cnt(b)-cnt(a)||armies(b)-armies(a));
+ const c=[...Array(S.n).keys()].filter(p=>p!=S.hs&&alive(p)&&!S.bots[p]&&NET.conns[p]&&NET.conns[p].open&&(!needActive||!((S.idle||[])[p]>0))).sort((a,b)=>(((S.idle||[])[a]||0)>0)-(((S.idle||[])[b]||0)>0)||cnt(b)-cnt(a)||armies(b)-armies(a));
  if(!c.length)return;
  const x=c[0],ep=(S.ep||0)+1;
  bcast();NET.conns.forEach(k=>{if(k&&k.open)k.send({t:"newhost",seat:x,ep})});
@@ -289,7 +290,7 @@ function idleCheck(p){
  if(!S.multi||NET.role!="host"||S.bots[p])return;
  S.act=S.act||[];S.idle=S.idle||[];S.idle[p]=S.act[p]?0:(S.idle[p]||0)+1;S.act[p]=false;
  if(S.idle[p]>=2){S.idle[p]=0;
-  if(p==S.hs)hostXfer();
+  if(p==S.hs)hostXfer(true);
   else{S.bots[p]=true;S.away=S.away||[];S.away[p]=true;S.lv[p]=1;S.pw[p]=.6;S.ev={id:(S.ev?S.ev.id:0)+1,t:"🤖 تحوّل "+PN[p]+" إلى حاسوب لغيابه دورين",c:p}}}
 }
 let hb=0;
@@ -304,7 +305,7 @@ function lobby(){
   t+=`<p>المتصلون: <span class="dot" style="background:${PC[0]}"></span>${PN[0]} (أنت) ${ks.map(i=>`<span class="dot" style="background:${PC[i]}"></span>${PN[i]}`).join(" ")}</p>`+OPTS+(ks.length?`<button onclick="goOnline()">ابدأ اللعبة (${ks.length+1} لاعبين)</button>`:`<p style="color:var(--mut)">بانتظار لاعب واحد على الأقل.</p>`);
  }else t+=NET.joined?`<p>انضممت بلون <span class="dot" style="background:${PC[NET.seat]}"></span><b>${PN[NET.seat]}</b>. بانتظار المضيف ليبدأ اللعبة...</p>`:(NET.err?"":`<p>جارٍ الاتصال بالغرفة...</p>`);
  a.innerHTML=t+`<button class="s" onclick="leave()">رجوع</button></div></div>`;
- if(sv[0]){ids.forEach((i,k)=>$(i).value=sv[k]);$("tmc").checked=sc}
+ ids.forEach((i,k)=>{const e=$(i);if(e&&sv[k]!=null)e.value=sv[k]});{const t=$("tmc");if(t&&sc!=null)t.checked=sc}
 }
 function goOnline(){
  const l=NET.conns.filter(c=>c&&c.open);NET.conns=[null,...l];
@@ -479,10 +480,10 @@ function restore(){
  }catch(e){try{localStorage.removeItem("asr_save")}catch(_){}S=null;NET.role="";render()}
 }
 function cfInfo(n){const a=S.sel,d=S.tgt;if(S.ph=="attack"){const da=S.A[d],win=wins(n,da,S.cur,S.T[d]),k=Math.ceil(n/2);return win?{sa:S.A[a]-n,sd:Math.max(1,n-da),win}:{sa:S.A[a]-k,sd:Math.max(1,da-k),win}}return{sa:S.A[a]-n,sd:S.A[d]+n,win:1}}
-function cfSet(v){const m=S.A[S.sel]-1;CFN=Math.max(1,Math.min(m,Math.round(v)));const e=$("cfn");if(e){e.textContent=CFN;e.className="cfnn "+(S.ph=="attack"?(cfInfo(CFN).win?"w":"l"):"")}}
+function cfSet(v){const m=S.A[S.sel]-1;CFN=Math.max(1,Math.min(m,Math.round(v)));const r=$("cfr");if(r)r.value=CFN;const e=$("cfn");if(e){e.textContent=CFN;e.className="cfnn "+(S.ph=="attack"?(cfInfo(CFN).win?"w":"l"):"")}}
 function cfHTML(){const a=S.sel,d=S.tgt,m=S.A[a]-1,at=S.ph=="attack",k=S.ph+a+">"+d;
  if(k!=cfKey){cfKey=k;CFN=at?Math.min(m,botNeed(S.cur,d)):m}CFN=Math.max(1,Math.min(m,CFN));const i=cfInfo(CFN);
- return `<div class="cf"><div class="cft"><span style="color:#22c55e">${R[a].n}</span> ${at?"⚔":"➜"} <span style="color:${at?"#ef4444":"#3b82f6"}">${R[d].n}</span>${S.tm&&L()[S.ph]?` <span class="dkt">⏱ <b class="tmv">${S.t}</b></span>`:""}</div><div class="cfs"><button class="s" onclick="cfSet(CFN-1)">−</button><b id="cfn" class="cfnn ${at?(i.win?"w":"l"):""}">${CFN}</b><button class="s" onclick="cfSet(CFN+1)">+</button></div><div class="cfb"><button onclick="cfOk()">✓ تأكيد</button><button class="s" onclick="cfNo()">✗ تراجع</button></div></div>`}
+ return `<div class="cf"><div class="cft"><span style="color:#22c55e">${R[a].n}</span> ${at?"⚔":"➜"} <span style="color:${at?"#ef4444":"#3b82f6"}">${R[d].n}</span>${S.tm&&L()[S.ph]?` <span class="dkt">⏱ <b class="tmv">${S.t}</b></span>`:""}</div><div class="cfs"><button class="s" onclick="cfSet(CFN-1)">−</button><b id="cfn" class="cfnn ${at?(i.win?"w":"l"):""}">${CFN}</b><button class="s" onclick="cfSet(CFN+1)">+</button></div><input id="cfr" type="range" min="1" max="${m}" value="${CFN}" oninput="cfSet(+this.value)"><div class="cfb"><button onclick="cfOk()">✓ تأكيد</button><button class="s" onclick="cfNo()">✗ تراجع</button></div></div>`}
 const cfOk=()=>act(S.ph=="attack"?"atk":"mv"),cfNo=()=>act("undo");
 function atk(n){
  const a=S.sel,d=S.tgt,da=S.A[d];
