@@ -7,8 +7,8 @@
 :root[data-theme="dark"]{--bg:#0d1a20;--fg:#e3eef0;--card:#162830;--ac:#4cc3b5;--bd:#2d4752;--mut:#8fb0b8;--sea:#10252e}
 html,body{height:100%}
 body{margin:0;padding:6px;box-sizing:border-box;background:var(--bg);color:var(--fg);font:14px/1.5 Tahoma,"Segoe UI",system-ui,sans-serif}
-#app{display:grid;grid-template-columns:310px 1fr;grid-template-rows:minmax(0,1fr) auto;gap:8px;height:100%}
-.side{overflow:auto;min-height:0;grid-column:1;grid-row:1/span 2}.mapw{min-height:0;grid-column:2;grid-row:1;background:var(--sea);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+#app{display:grid;grid-template-columns:310px 1fr;grid-template-rows:auto minmax(0,1fr);gap:8px;height:100%}
+.side{overflow:auto;min-height:0;grid-column:1;grid-row:2}.mapw{min-height:0;grid-column:2;grid-row:1/span 2;background:var(--sea);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
 html,body{-webkit-tap-highlight-color:transparent}
 .mapw,.mapw *,.zc button,button{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;outline:none}
 input,select{-webkit-user-select:text;user-select:text}
@@ -21,7 +21,7 @@ input,select{-webkit-user-select:text;user-select:text}
 .mc.an{animation:pop .38s cubic-bezier(.2,1.35,.4,1)}
 .mc .card{border:0;padding:0;margin:0 0 8px;background:transparent}.mc h3{font-size:19px}
 .mc tr{animation:rowin .45s both}.mc tr:nth-child(2){animation-delay:.2s}.mc tr:nth-child(3){animation-delay:.4s}.mc tr:nth-child(4){animation-delay:.6s}.mc tr:nth-child(5){animation-delay:.8s}
-.dock{grid-column:2;grid-row:2;max-height:34vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;box-sizing:border-box}.cf{position:fixed;inset:0;margin:auto;height:max-content;width:min(320px,92vw);z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:pop .3s;box-sizing:border-box;text-align:center}
+.dock{grid-column:1;grid-row:1;max-height:42vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;box-sizing:border-box}.cf{position:fixed;inset:0;margin:auto;height:max-content;width:min(320px,92vw);z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:pop .3s;box-sizing:border-box;text-align:center}
 .cft{font-size:17px;font-weight:bold}.cfv{display:flex;justify-content:space-around;margin:6px 0}.cfv small{display:block;color:var(--mut);font-size:12px}.cfv b{font-size:38px;line-height:1.1}
 .cfs{display:flex;align-items:center;justify-content:center;gap:14px}.cfs button{min-width:46px}.cfnn{font-size:46px;min-width:80px;line-height:1.1}.cfnn.w{color:#22a35a}.cfnn.l{color:#d0453a}.cf input[type=range]{width:100%;padding:0;margin:6px 0}.cfv b.w{color:#22a35a}.cfv b.l{color:#d0453a}
 
@@ -201,7 +201,7 @@ function openSet(){
  $("cs").onchange=e=>{CFG.snd=e.target.checked;saveCfg();if(CFG.snd)SND.click()};$("cl").onchange=e=>{CFG.lab=e.target.value;saveCfg();vb()};
 }
 const BOTSH=`<p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
-const NET={role:"",conns:[],seat:0};
+const NET={role:"",conns:[],seat:0,ep:0,age:0,t:0};
 const OPTS=`<p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}<p>هدف الفوز: <select id="md" style="width:auto"><option value="all">احتلال جميع المناطق</option><option value="c5">احتلال 5 مناطق فوق ما تملك</option><option value="c8" selected>احتلال 8 مناطق فوق ما تملك</option><option value="c12">احتلال 12 منطقة فوق ما تملك</option><option value="a40">زيادة 40 جيشاً فوق ما تملك</option><option value="a80">زيادة 80 جيشاً فوق ما تملك</option><option value="a120">زيادة 120 جيشاً فوق ما تملك</option><option value="cap">احتلال العواصم</option></select></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>12</option><option selected>20</option><option>30</option><option value="0">لا نهائية</option></select></p>`;
 function bcast(){
  if(NET.role!="host"||!S)return;
@@ -209,44 +209,91 @@ function bcast(){
  if(S.ph=="q"){o.got=Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined);o.gs=[]}
  NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"state",S:o})});
 }
-function host(code0){
- if(NET.peer)try{NET.peer.destroy()}catch(e){}
- const code=code0||Math.random().toString(36).slice(2,6).toUpperCase();
- NET.role="host";NET.code=code;NET.seat=0;NET.err="";NET.ready=0;
- const pr=NET.peer=new Peer("asr-"+code);
- pr.on("open",()=>{NET.ready=1;if(!S)lobby()});
- pr.on("error",e=>{if(e.type=="unavailable-id"){if(code0)setTimeout(()=>host(code0),2500);else host()}else{NET.err=e.type;if(!S)lobby()}});
- pr.on("connection",c=>{
-  c.on("data",d=>{
-   if(d.t=="hello"&&c.seat==null){
-    let s=-1;
-    if(S&&S.multi){if(Number.isInteger(d.seat)&&d.seat>0&&d.seat<S.n&&(!NET.conns[d.seat]||!NET.conns[d.seat].open))s=d.seat}
-    else for(let i=1;i<8;i++)if(!NET.conns[i]||!NET.conns[i].open){s=i;break}
-    if(s<0)return c.send({t:"full"});
-    c.seat=s;NET.conns[s]=c;c.send({t:"hello",seat:s});S?bcast():lobby();
-   }else if(c.seat!=null)apply(c.seat,d.t,d.a);
-  });
-  c.on("close",()=>{if(!S)lobby()});
+let migT=0;const hid=(c,e)=>"asr-"+String(c).toUpperCase().trim()+(e?"-"+e:"");
+function onConn(c){
+ c.on("data",d=>{
+  if(d.t=="hello"&&c.seat==null){
+   let s=-1;
+   if(S&&S.multi){if(Number.isInteger(d.seat)&&d.seat>=0&&d.seat<S.n&&d.seat!=NET.seat&&(!NET.conns[d.seat]||!NET.conns[d.seat].open))s=d.seat}
+   else for(let i=1;i<8;i++)if(!NET.conns[i]||!NET.conns[i].open){s=i;break}
+   if(s<0)return c.send({t:"full"});
+   c.seat=s;NET.conns[s]=c;c.send({t:"hello",seat:s});S?bcast():lobby();
+  }else if(c.seat!=null)apply(c.seat,d.t,d.a);
  });
+ c.on("close",()=>{if(!S)lobby()});
+}
+function host(){
+ if(NET.peer)try{NET.peer.destroy()}catch(e){}
+ const code=Math.random().toString(36).slice(2,6).toUpperCase();
+ NET.role="host";NET.code=code;NET.seat=0;NET.ep=0;NET.err="";NET.ready=0;
+ const pr=NET.peer=new Peer(hid(code,0));
+ pr.on("open",()=>{NET.ready=1;if(!S)lobby()});
+ pr.on("error",e=>{if(e.type=="unavailable-id")host();else{NET.err=e.type;if(!S)lobby()}});
+ pr.on("connection",onConn);
  if(!S)lobby();
 }
-function join(code){
+function onData(d){
+ NET.age=0;
+ if(d.t=="hello"){NET.seat=d.seat;NET.joined=1;try{sessionStorage.setItem("asrseat",d.seat)}catch(e){}if(!S)lobby()}
+ else if(d.t=="state"){S=d.S;NET.ep=S.ep||0;render()}
+ else if(d.t=="full"){NET.err="الغرفة ممتلئة أو بدأت";lobby()}
+ else if(d.t=="newhost"){if(d.seat==NET.seat)becomeHost(d.ep);else{NET.mig=true;NET.mt0=NET.t+1e9;migT=1;probe(d.ep)}}
+}
+function join(code,ep){
  if(NET.peer)try{NET.peer.destroy()}catch(e){}
- NET.role="client";NET.code=code;NET.err="";NET.joined=0;
+ NET.role="client";NET.code=code;NET.ep=ep||0;NET.err="";NET.joined=0;NET.mig=false;migT=0;
+ const retry=()=>{if(S&&S.multi)lost();else setTimeout(()=>{if(NET.role=="client"&&!(NET.c&&NET.c.open))join(NET.code,NET.ep)},2500)};
  const pr=NET.peer=new Peer();
  pr.on("open",()=>{
-  const c=NET.c=pr.connect("asr-"+String(code).toUpperCase().trim(),{reliable:true});
-  c.on("open",()=>{let sv=null;try{sv=sessionStorage.getItem("asrseat")}catch(e){}c.send({t:"hello",seat:sv==null?null:+sv})});
-  c.on("data",d=>{
-   if(d.t=="hello"){NET.seat=d.seat;NET.joined=1;try{sessionStorage.setItem("asrseat",d.seat)}catch(e){}if(!S)lobby()}
-   else if(d.t=="state"){S=d.S;render()}
-   else if(d.t=="full"){NET.err="الغرفة ممتلئة أو بدأت";lobby()}
-  });
-  c.on("close",()=>{NET.err="انقطع الاتصال بالمضيف";if(!S)lobby();setTimeout(()=>{if(NET.role=="client"&&!(NET.c&&NET.c.open))join(NET.code)},2500)});
+  const c=NET.c=pr.connect(hid(code,NET.ep),{reliable:true});
+  c.on("open",()=>{let sv=null;try{sv=sessionStorage.getItem("asrseat")}catch(e){}c.send({t:"hello",seat:S?NET.seat:(sv==null?null:+sv)})});
+  c.on("data",onData);
+  c.on("close",()=>{NET.err="انقطع الاتصال بالمضيف";if(!S)lobby();retry()});
  });
- pr.on("error",e=>{NET.err=e.type;if(!S)lobby();setTimeout(()=>{if(NET.role=="client"&&!(NET.c&&NET.c.open))join(NET.code)},3000)});
+ pr.on("error",e=>{NET.err=e.type;if(!S)lobby();retry()});
  if(!S)lobby();
 }
+function lost(){
+ if(!S||!S.multi||S.ph=="end"||NET.role!="client"||migT)return;
+ const hum=[...Array(S.n).keys()].filter(p=>p!=S.hs&&alive(p)&&!(S.bots&&S.bots[p])).sort((a,b)=>a-b),rank=Math.max(0,hum.indexOf(NET.seat));
+ NET.mig=true;NET.mt0=NET.t+rank*3;migT=1;probe(NET.ep+1);
+}
+function probe(ep){
+ if(!NET.mig)return;
+ if(NET.peer)try{NET.peer.destroy()}catch(e){}
+ const pr=NET.peer=new Peer();
+ pr.on("open",()=>{const c=NET.c=pr.connect(hid(NET.code,ep),{reliable:true});
+  c.on("open",()=>{NET.ep=ep;NET.mig=false;migT=0;NET.age=0;c.send({t:"hello",seat:NET.seat})});
+  c.on("data",onData);c.on("close",()=>{migT=0;lost()})});
+ pr.on("error",e=>{const un=e.type=="peer-unavailable";setTimeout(()=>{if(!NET.mig)return;if(un&&NET.t>=NET.mt0)becomeHost(ep);else probe(ep)},un?1500:2500)});
+}
+function becomeHost(ep){
+ if(NET.peer)try{NET.peer.destroy()}catch(e){}
+ NET.role="host";NET.ep=ep;NET.mig=false;migT=0;NET.conns=[];NET.ready=0;
+ S.ep=ep;S.hs=NET.seat;S.ev={id:(S.ev?S.ev.id:0)+1,t:"🔁 انتقلت الاستضافة إلى "+PN[NET.seat],c:NET.seat};
+ const pr=NET.peer=new Peer(hid(NET.code,ep));
+ pr.on("open",()=>{NET.ready=1;render()});
+ pr.on("error",e=>{if(e.type=="unavailable-id"){NET.role="client";NET.mig=true;migT=1;NET.mt0=NET.t+1e9;probe(ep)}});
+ pr.on("connection",onConn);
+ render();
+}
+function hostXfer(){
+ if(NET.role!="host"||!S||!S.multi||S.ph=="end")return;
+ const c=[...Array(S.n).keys()].filter(p=>p!=S.hs&&alive(p)&&!S.bots[p]&&NET.conns[p]&&NET.conns[p].open).sort((a,b)=>cnt(b)-cnt(a)||armies(b)-armies(a));
+ if(!c.length)return;
+ const x=c[0],ep=(S.ep||0)+1;
+ bcast();NET.conns.forEach(k=>{if(k&&k.open)k.send({t:"newhost",seat:x,ep})});
+ setTimeout(()=>{NET.role="client";NET.mig=true;NET.mt0=NET.t+1e9;migT=1;NET.age=0;probe(ep)},600);
+}
+function idleCheck(p){
+ if(!S.multi||NET.role!="host"||S.bots[p])return;
+ S.act=S.act||[];S.idle=S.idle||[];S.idle[p]=S.act[p]?0:(S.idle[p]||0)+1;S.act[p]=false;
+ if(S.idle[p]>=2){S.idle[p]=0;
+  if(p==S.hs)hostXfer();
+  else{S.bots[p]=true;S.away=S.away||[];S.away[p]=true;S.lv[p]=1;S.pw[p]=.6;S.ev={id:(S.ev?S.ev.id:0)+1,t:"🤖 تحوّل "+PN[p]+" إلى حاسوب لغيابه دورين",c:p}}}
+}
+let hb=0;
+setInterval(()=>{NET.t++;if(NET.role=="host"){if(++hb%3==0)NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"ping"})})}else if(NET.role=="client"&&S&&S.multi&&S.ph!="end"&&!NET.mig&&++NET.age>12)lost()},1000);
 function lobby(){
  const a=$("app"),h=NET.role=="host",ids=["md","mr","tq","tr","td","ta","tf","bn","bd"],sv=ids.map(i=>$(i)&&$(i).value),sc=$("tmc")&&$("tmc").checked;
  let t=`<div class="side"><div class="card"><h2>غرفة اللعب</h2>`;
@@ -279,15 +326,17 @@ function act(t,a){
 }
 function apply(seat,t,a){
  if(!S||S.ph=="end")return;
+ if(t=="resume"){if(S.bots&&S.bots[seat]&&S.away&&S.away[seat]){S.bots[seat]=false;S.away[seat]=false;if(S.idle)S.idle[seat]=0;if(S.act)S.act[seat]=true;render()}return}
  if(S.bots&&S.bots[S.cur]&&(S.ph=="deploy"||S.ph=="attack"||S.ph=="fortify"))return;
  const my=!S.multi||seat==S.cur,ph=S.ph;
+ if(S.multi&&S.act&&!(S.bots&&S.bots[seat])&&(t=="clk"||t=="atk"||t=="mv"||(t=="guess"&&!isNaN(a))))S.act[seat]=true;
  if(t=="skip"){
   if(ph=="q"){if(S.multi){if(S.gs[seat]===undefined&&alive(seat)){S.gs[seat]=NaN;[...Array(S.n).keys()].filter(alive).every(p=>S.gs[p]!==undefined)?results():render()}}else guess(NaN,seat,1)}
-  else if(ph=="qr"){if(!S.multi||seat==0)begin()}
+  else if(ph=="qr"){if(!S.multi||seat==S.hs)begin()}
   else if(my)timeout();
   return}
  if(t=="guess"&&ph=="q")guess(a,seat);
- else if(t=="begin"&&ph=="qr"&&(!S.multi||seat==0))begin();
+ else if(t=="begin"&&ph=="qr"&&(!S.multi||seat==S.hs))begin();
  else if(!my)return;
  else if(t=="clk"&&Number.isInteger(a)&&a>=0&&a<N&&(ph=="deploy"||ph=="attack"||ph=="fortify"))clk(a);
  else if(t=="atk"&&ph=="attack"&&S.sel!=null&&S.tgt!=null&&a>=1&&a<S.A[S.sel])atk(a);
@@ -297,7 +346,7 @@ function apply(seat,t,a){
  else if(t=="endTurn"&&ph=="fortify")endTurn();
 }
 function start(n){
- QS=shuf(Q);S={n,bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:$("md")?$("md").value:"c8",max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:""};
+ QS=shuf(Q);S={n,bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:$("md")?$("md").value:"c8",max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:0,ep:0,act:[],idle:[],away:[]};
  for(let i=0;i<n;i++)S.P.push({res:0});
  let rest=[...Array(N).keys()];
  if(S.mode=="cap"){
@@ -371,7 +420,7 @@ function fx(){
   else if(S.ph=="deploy")splash("دور "+nm(S.cur),PC[S.cur],!S.multi||S.cur==NET.seat?"وزّع جيوشك":"");
   else if(S.ph=="attack")splash("الهجوم ⚔",PC[S.cur],"");
   else if(S.ph=="fortify")splash("إعادة التمركز",PC[S.cur],"");}
- if(S.ev&&S.ev.id!=lastEv){lastEv=S.ev.id;splash(S.ev.t,PC[S.ev.c],"");const w=S.ev.t.indexOf("استولى")>=0;SND.attack();setTimeout(()=>w?SND.conquer():SND.fail(),260)}
+ if(S.ev&&S.ev.id!=lastEv){lastEv=S.ev.id;splash(S.ev.t,PC[S.ev.c],"");const w=S.ev.t.indexOf("استولى")>=0;if(S.ev.t.indexOf("الاستضافة")<0&&S.ev.t.indexOf("حاسوب")<0){SND.attack();setTimeout(()=>w?SND.conquer():SND.fail(),260)}else SND.turn()}
 }
 const nm=p=>PN[p]+(S&&S.bots&&S.bots[p]?" 🤖":"");
 const nbr=i=>{const o=[];for(let j=0;j<N;j++)if(ADJ[i][j])o.push(j);return o};
@@ -413,8 +462,8 @@ function scheduleBot(){
 function toBot(i,l){if(NET.role!="host"||!S||!S.multi)return;S.bots[i]=true;S.lv[i]=l;S.pw[i]=[.42,.6,.78][l]+(Math.random()-.5)*.16;botAsk=-1;
  if(S.ph=="q"&&S.gs[i]===undefined&&alive(i)){S.gs[i]=botGuess(i);if([...Array(S.n).keys()].filter(alive).every(p=>S.gs[p]!==undefined))return results()}render()}
 function toHuman(i){if(NET.role!="host"||!S)return;S.bots[i]=false;render()}
-const stripX=i=>{let o="";if(S.bots[i])o+=` · ${["سهل","متوسط","صعب"][S.lv[i]]} (${Math.round(S.pw[i]*100)}%)`;if(NET.role=="host"&&S.multi&&i!=0){if(!S.bots[i])o+=`<br><button class="s sm" onclick="botAsk=${i};render()">🤖 تحويل إلى حاسوب</button>`;else if(S.hum&&S.hum[i])o+=`<br><button class="s sm" onclick="toHuman(${i})">👤 إعادة اللاعب</button>`}return o};
-const VER=10;
+const stripX=i=>{let o="";if(S.bots[i])o+=` · ${["سهل","متوسط","صعب"][S.lv[i]]} (${Math.round(S.pw[i]*100)}%)`;if(NET.role=="host"&&S.multi&&i!=S.hs){if(!S.bots[i])o+=`<br><button class="s sm" onclick="botAsk=${i};render()">🤖 تحويل إلى حاسوب</button>`;else if(S.hum&&S.hum[i])o+=`<br><button class="s sm" onclick="toHuman(${i})">👤 إعادة اللاعب</button>`}return o};
+const VER=11;
 function save(){try{if(!S||S.ph=="end"){localStorage.removeItem("asr_save");return}localStorage.setItem("asr_save",JSON.stringify({ver:VER,role:NET.role,code:NET.code,seat:NET.seat,S}))}catch(e){}}
 function leave(){try{localStorage.removeItem("asr_save");sessionStorage.removeItem("asrseat")}catch(e){}location.reload()}
 function showErr(){if(document.getElementById("errb"))return;const d=document.createElement("div");d.id="errb";d.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:20;background:#7a1f1f;color:#fff;padding:8px 12px;border-radius:12px;text-align:center";d.innerHTML='حدث خطأ غير متوقع. <button onclick="leave()" style="background:#fff;color:#7a1f1f">إعادة اللعبة</button> <button class="s" style="color:#fff;border-color:#fff" onclick="this.parentNode.remove()">تجاهل</button>';document.body.appendChild(d)}
@@ -424,7 +473,7 @@ function restore(){
   let v=null;try{v=JSON.parse(localStorage.getItem("asr_save")||"null")}catch(e){}
   if(v&&v.ver==VER&&v.S&&v.S.ph&&v.S.ph!="end"&&v.S.T&&v.S.T.length==N){
    S=v.S;lastSk=S.ph+"|"+S.cur+"|"+S.r;lastEv=S.ev?S.ev.id:-1;
-   if(v.role=="host"){host(v.code)}else if(v.role=="client"){NET.role="client";NET.seat=v.seat;join(v.code)}
+   if(v.role=="host"){NET.role="client";NET.code=v.code;NET.seat=v.seat||0;NET.ep=S.ep||0;NET.mig=true;NET.mt0=NET.t+3;migT=1;probe(NET.ep+1)}else if(v.role=="client"){NET.role="client";NET.seat=v.seat;join(v.code,S.ep||0)}
   }
   render();
  }catch(e){try{localStorage.removeItem("asr_save")}catch(_){}S=null;NET.role="";render()}
@@ -440,18 +489,19 @@ function atk(n){
   if(wins(n,da,S.cur,S.T[d])){S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${PN[S.cur]} على ${R[d].n}.`}
  else{{const k=Math.ceil(n/2);S.A[a]-=k;S.A[d]=Math.max(1,da-k);S.msg=`فشل الهجوم على ${R[d].n}: خسر الطرفان ${k} جيش.`}}
  S.ev={id:(S.ev?S.ev.id:0)+1,t:S.msg,c:S.cur};S.sel=S.tgt=null;if(!win())render();
+ if(S.multi&&NET.role=="host"&&S.ph!="end"&&!alive(S.hs))setTimeout(hostXfer,400);
 }
 const armies=p=>S.A.reduce((s,a,i)=>s+(S.T[i]==p?a:0),0);
 function goal(){const m=S.mode,n=m.slice(1);return m=="all"?"احتلال جميع المناطق الـ"+N:m=="cap"?"احتلال عواصم جميع اللاعبين ★":m[0]=="c"?"احتلال "+n+" مناطق جديدة فوق ما تملكه عند البداية":"زيادة جيوشك "+n+" فوق ما بدأت به"}
 function won(p){const m=S.mode,n=+m.slice(1);return m=="all"?cnt(p)==N:m=="cap"?S.cap.every(c=>S.T[c]==p):m[0]=="c"?cnt(p)>=S.i0[p]+n:armies(p)>=S.ia[p]+n}
 function win(){
- if(S.bots&&![...Array(S.n).keys()].some(p=>alive(p)&&!S.bots[p])){finish();return true}
+ if(S.hum&&![...Array(S.n).keys()].some(p=>alive(p)&&S.hum[p])){finish();return true}
  for(let p=0;p<S.n;p++)if(alive(p)&&won(p)){finish(p);return true}
  if([...Array(S.n).keys()].filter(alive).length==1){finish(S.T[0]);return true}
  return false;
 }
 function endTurn(){
- S.sel=S.tgt=null;let c=S.cur,w=false;
+ idleCheck(S.cur);S.sel=S.tgt=null;let c=S.cur,w=false;
  do{c++;if(c>=S.n){c=0;w=true}}while(!alive(c));
  S.cur=c;w?nextRound():startTurn();
 }
@@ -491,6 +541,7 @@ function render0(){
  if(S.ph=="end"){if(lastEnd!=S.r+"w"){lastEnd=S.r+"w";SND.win()}app.innerHTML=`<div class="side"><div class="card"><h2>الفائز: ${PN[S.w]}</h2><p>يحكم ${cnt(S.w)} من ${N} منطقة.</p><button onclick="leave()">لعبة جديدة</button></div></div>${mapw()}`;return}
  const key=S.ph+S.cur+S.gi+S.r;if(S.key!=key){S.key=key;S.t=L()[S.ph]||0;askSkip=false}
  const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
+ if(S.multi&&NET.role&&S.bots&&S.bots[NET.seat]&&S.away&&S.away[NET.seat])h=`<div class="card"><p>🤖 الحاسوب يلعب نيابةً عنك لأنك غبت دورين.</p><button onclick="act('resume')">▶ إكمال اللعبة</button></div>`+h;
  const h0=h;
  if(S.ph=="q"&&S.multi)modal=qm();
  else if(S.ph=="q")modal=`<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p><p><span class="dot" style="background:${PC[S.gi]}"></span><b>${PN[S.gi]}</b>، اكتب تقديرك سراً ولا ينظر غيرك:</p><input id="gv" type="password" inputmode="decimal" autocomplete="off"> <button onclick="act('guess')">تأكيد</button><div class="msg">${S.msg}</div></div>`;
