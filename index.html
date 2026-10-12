@@ -7,10 +7,10 @@
 :root[data-theme="dark"]{--bg:#0d1a20;--fg:#e3eef0;--card:#162830;--ac:#4cc3b5;--bd:#2d4752;--mut:#8fb0b8;--sea:#10252e}
 html,body{height:100%}
 body{margin:0;padding:6px;box-sizing:border-box;background:var(--bg);color:var(--fg);font:14px/1.5 Tahoma,"Segoe UI",system-ui,sans-serif}
-#app{display:grid;grid-template-columns:310px 1fr;grid-template-rows:auto minmax(0,1fr);gap:8px;height:100%}
-.side{overflow:auto;min-height:0;grid-column:1;grid-row:2}.mapw{min-height:0;grid-column:2;grid-row:1/span 2;background:var(--sea);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+#app{display:grid;grid-template-columns:310px 1fr;grid-template-rows:auto auto minmax(0,1fr);gap:8px;height:100%}
+.side{overflow:auto;min-height:0;grid-column:1;grid-row:3}.mapw{min-height:0;grid-column:2;grid-row:1/span 3;background:var(--sea);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
 html,body{-webkit-tap-highlight-color:transparent}
-.mapw,.mapw *,.zc button,button{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;outline:none}
+.mapw,.mapw *,button{-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;outline:none}
 input,select{-webkit-user-select:text;user-select:text}
 .mapw polygon:active{filter:brightness(1.2)}.sm{font-size:12px;padding:3px 10px}.sk{margin-top:6px;font-size:13px}
 .mapw svg{width:100%;height:100%;display:block}
@@ -21,16 +21,17 @@ input,select{-webkit-user-select:text;user-select:text}
 .mc.an{animation:pop .38s cubic-bezier(.2,1.35,.4,1)}
 .mc .card{border:0;padding:0;margin:0 0 8px;background:transparent}.mc h3{font-size:19px}
 .mc tr{animation:rowin .45s both}.mc tr:nth-child(2){animation-delay:.2s}.mc tr:nth-child(3){animation-delay:.4s}.mc tr:nth-child(4){animation-delay:.6s}.mc tr:nth-child(5){animation-delay:.8s}
-.dock{grid-column:1;grid-row:1;max-height:42vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;box-sizing:border-box}.cf{position:fixed;inset:0;margin:auto;height:max-content;width:min(320px,92vw);z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:pop .3s;box-sizing:border-box;text-align:center}
+.dock{grid-column:1;grid-row:2;max-height:38vh;overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 12px;box-sizing:border-box}.cf{position:fixed;inset:0;margin:auto;height:max-content;width:min(320px,92vw);z-index:5;background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:12px 14px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:pop .3s;box-sizing:border-box;text-align:center}
 .cft{font-size:17px;font-weight:bold}.cfv{display:flex;justify-content:space-around;margin:6px 0}.cfv small{display:block;color:var(--mut);font-size:12px}.cfv b{font-size:38px;line-height:1.1}
 .cfs{display:flex;align-items:center;justify-content:center;gap:14px}.cfs button{min-width:46px}.cfnn{font-size:46px;min-width:80px;line-height:1.1}.cfnn.w{color:#22a35a}.cfnn.l{color:#d0453a}.cf input[type=range]{width:100%;padding:0;margin:6px 0}.cfv b.w{color:#22a35a}.cfv b.l{color:#d0453a}
 
 .cfb button{min-width:120px;font-size:17px}
 .dock .card{border:0;background:transparent;padding:0;margin:0 0 4px}.dock h3{font-size:15px;margin:0 0 4px}.dkt{font-size:13px;color:var(--mut);margin-inline-end:8px}
 #setm{z-index:8}
-.rxp{position:absolute;inset-inline-start:56px;bottom:8px;display:grid;grid-template-columns:repeat(4,40px);gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;z-index:4;box-shadow:0 8px 24px rgba(0,0,0,.35)}.rxp button{width:40px;height:40px;padding:0;margin:0;font-size:24px;background:transparent;border:0}
+.tool{display:flex;gap:6px;justify-content:center;align-items:center;position:relative}.tool button{width:46px;height:40px;padding:0;margin:0;font-size:21px;line-height:1}.cts{display:contents}.mapw .mv{position:absolute;inset:0}.qb{text-align:center}.qb b{font-size:36px}.qb input{width:100%;padding:0;margin:4px 0}.qbr{display:flex;justify-content:space-between;color:var(--mut);font-size:12px}
+.rxp{position:absolute;inset-inline-start:0;top:100%;margin-top:4px;display:grid;grid-template-columns:repeat(4,40px);gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;z-index:4;box-shadow:0 8px 24px rgba(0,0,0,.35)}.rxp button{width:40px;height:40px;padding:0;margin:0;font-size:24px;background:transparent;border:0}
 .rxs{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:3px;pointer-events:none;z-index:3;direction:ltr;max-height:62%;overflow:hidden}
-.rxb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg);text-shadow:0 0 4px var(--bg),0 0 2px var(--bg);animation:rxin .35s both,rxout .6s both;direction:ltr}.rxb span{font-size:24px}.rxb b{font-size:22px;line-height:1;font-weight:900}.rxb i{font-style:normal;font-size:12px}
+.rxb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg);text-shadow:0 0 4px var(--bg),0 0 2px var(--bg);animation:rxin .35s both,rxout .6s both;direction:ltr}.rxb span{font-size:24px}.rxb u{text-decoration:none;font-size:14px}.rxb i{font-style:normal;font-size:12px}
 .qflash{position:fixed;inset:0;z-index:15;pointer-events:none;background:var(--ac);opacity:0;animation:qf .9s ease 2}
 @keyframes qf{0%,100%{opacity:0}40%{opacity:.35}}@keyframes rxin{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}@keyframes rxout{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}#helpm{z-index:9}.hlp{max-height:86vh;overflow:auto;text-align:start}.hlp h4{margin:10px 0 2px;color:var(--ac)}.hlp p,.hlp li{font-size:14px;margin:2px 0}.hlp ol,.hlp ul{margin:2px 0;padding-inline-start:20px}
 .spl{position:fixed;left:50%;bottom:9%;z-index:9;pointer-events:none;text-align:center;padding:10px 32px;border-radius:40px;background:var(--pc);color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:spl 1.9s ease both;display:flex;flex-direction:column}
@@ -38,7 +39,7 @@ input,select{-webkit-user-select:text;user-select:text}
 @keyframes pop{from{transform:scale(.72) translateY(20px);opacity:0}to{transform:none;opacity:1}}
 @keyframes rowin{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
 @keyframes spl{0%{transform:translate(-50%,30px) scale(.6);opacity:0}12%{transform:translate(-50%,0) scale(1.08);opacity:1}20%{transform:translate(-50%,0) scale(1)}80%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,12px);opacity:0}}
-@media(prefers-reduced-motion:reduce){.mc,.mc tr,.spl,.rxb{animation:none}.qflash{display:none}}.mapw{position:relative;touch-action:none}.zc{position:absolute;inset-inline-start:8px;bottom:8px;display:flex;flex-direction:column;gap:4px}.zc button{width:38px;height:38px;padding:0;margin:0;font-size:22px;line-height:1}
+@media(prefers-reduced-motion:reduce){.mc,.mc tr,.spl,.rxb{animation:none}.qflash{display:none}}.mapw{position:relative;touch-action:none}
 h2{margin:0 0 6px;font-size:20px}h3{margin:0 0 6px;font-size:15px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:0 0 8px}
 button{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:8px;padding:6px 14px;margin:3px;cursor:pointer}
@@ -56,8 +57,8 @@ details{font-size:12px;color:var(--mut)}
 .sv{opacity:var(--s,1);transition:opacity .35s;pointer-events:none}
 @supports(height:100dvh){html,body{height:100dvh}}
 @media(max-width:700px) and (orientation:portrait){
- #app{grid-template-columns:1fr;grid-template-rows:minmax(0,44%) auto minmax(0,1fr)}
- .mapw{grid-row:1;grid-column:1}.dock{grid-row:2;grid-column:1;max-height:30vh}.cf{position:static;inset:auto;margin:0;width:auto;height:auto;grid-row:2;grid-column:1;box-shadow:none;animation:none}.side{grid-row:3;grid-column:1}
+ #app{grid-template-columns:1fr;grid-template-rows:minmax(0,42%) auto auto minmax(0,1fr)}
+ .mapw{grid-row:1;grid-column:1}.tool{grid-row:2;grid-column:1}.dock{grid-row:3;grid-column:1;max-height:28vh}.cf{position:static;inset:auto;margin:0;width:auto;height:auto;grid-row:3;grid-column:1;box-shadow:none;animation:none}.side{grid-row:4;grid-column:1}.rxp{top:auto;bottom:100%;margin:0 0 4px}
  .pr{display:inline-block;margin:2px 3px 2px 0;padding:2px 8px}
  button{min-height:40px}.card{padding:8px 10px}
  .mc{padding:14px 16px}
@@ -89,7 +90,7 @@ const R=[
 ["الكويت","k I11 I10 Kc1 Kc2 g1"],
 ["دمشق","Js2 Pn2 Sa Sb I1 Jz2 Jz3 Js1"],["حلب","Sb Sc Sd Se Sf Sg I2 I1"],["بيروت","Pn1 Pn2 Sa Sb Sc Ld Lc"],["صنعاء","j1 y4 y3 y2 Yb1 Yb3 Ycs Ych"],["عدن","Yb3 Yb1 Yb2 Yc1 Yc2 Yc3 Ycs"],["المكلا","y2 y1 o2 Yo1 Yo2 Ym1 Yc1 Yb2 Yb1"],["مسقط","u2 Ou1 Ou2 Oc1 Oc2 Od Ob1 o1"],["صلالة","Ob1 Od Oc3 Oc5 Oc4 Yo2 Yo1 o2"],["أبوظبي","u1 Ua Ub Uh Ou1 u2"],["دبي","Uh Uc Ud Ue Ou2 Ou1"]
 ].map(r=>({n:r[0],v:r[1].split(" "),l:r[2]}));
-const N=R.length,WIN=9,PN=["الأحمر","الأزرق","الأخضر","الذهبي","البنفسجي","البرتقالي","الفيروزي","الوردي"],PC=["#c0392b","#2471a3","#1e8449","#b7950b","#7d3c98","#d35400","#17a2a2","#c2578f"];
+const N=R.length,WIN=9,PN=["الأحمر","الأزرق","الأخضر","الذهبي","البنفسجي","البرتقالي","البني","الرمادي"],PC=["#c0392b","#2471a3","#1e8449","#b7950b","#7d3c98","#d35400","#8b5a2b","#9aa5ab"],DOT=["🔴","🔵","🟢","🟡","🟣","🟠","🟤","⚪"];
 const px=p=>[(p[0]-34)*34+20,(34-p[1])*34+10];
 function pca(P){const n=P.length,mx=P.reduce((q,p)=>q+p[0],0)/n,my=P.reduce((q,p)=>q+p[1],0)/n;let sxx=0,syy=0,sxy=0;P.forEach(p=>{sxx+=(p[0]-mx)**2;syy+=(p[1]-my)**2;sxy+=(p[0]-mx)*(p[1]-my)});const t=Math.hypot(sxx-syy,2*sxy),el=Math.sqrt((sxx+syy+t)/Math.max(1e-6,sxx+syy-t));let th=.5*Math.atan2(2*sxy,sxx-syy),deg=th*180/Math.PI;deg=el<1.3?0:Math.max(-40,Math.min(40,deg));th=deg*Math.PI/180;return{th,deg}}
 function inr(i){
@@ -153,7 +154,13 @@ let RXL=[],RXT={},RXC=0,lastRx=0,qTT=0,CFN=1,cfKey="",S=null,QS=[],lastMk="",las
 const alive=p=>S.T.includes(p),cnt=p=>S.T.filter(t=>t==p).length;
 function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const Z={x:-350,y:-130,w:1300,h:960,moved:0},PT=new Map();let pd=0;
-const mapw=()=>`<div class="mapw">${mapSvg()}<div class="zc"><button onclick="zoom(1.3)">+</button><button onclick="zoom(1/1.3)">−</button><button onclick="rst()">⌂</button><button onclick="rxToggle()" title="تعليق">💬</button><button onclick="openSet()" title="الإعدادات">⚙</button></div><div class="rxs">${rxInner()}</div></div>`;
+const mapw=()=>`<div class="mapw" id="pMap"><div class="mv" id="pMv">${mapSvg()}</div><div class="rxs">${rxInner()}</div></div>`;
+const TOOLH=`<button onclick="zoom(1.3)" title="تقريب">+</button><button onclick="zoom(1/1.3)" title="تصغير">−</button><button onclick="rst()" title="إعادة الضبط">⌂</button><button onclick="rxToggle()" title="تعليق">💬</button><button onclick="openSet()" title="الإعدادات">⚙</button>`;
+function setP(id,html){const e=document.getElementById(id);if(e&&e._h!==html){e.innerHTML=html;e._h=html}}
+function paintGame(side,dock,cf,mod){
+ if(!document.getElementById("pTool")||!document.getElementById("pSide"))$("app").innerHTML=`<div class="side" id="pSide"></div><div class="mapw" id="pMap"><div class="mv" id="pMv"></div><div class="rxs">${rxInner()}</div></div><div class="tool" id="pTool">${TOOLH}</div><div id="pDock" class="cts"></div><div id="pCf" class="cts"></div><div id="pMod" class="cts"></div>`;
+ setP("pSide",side);setP("pMv",mapSvg());setP("pDock",dock);setP("pCf",cf);setP("pMod",mod);
+}
 function reMap(){PT.clear();pd=0;Z.moved=0;closeSet();render()}
 function vb(){const e=document.querySelector(".mapw svg");if(e){e.setAttribute("viewBox",`${Z.x} ${Z.y} ${Z.w} ${Z.h}`);const l=lod();e.style.setProperty("--c",l.c);e.style.setProperty("--k",l.k);e.style.setProperty("--s",l.s)}}
 function geo(){const e=document.querySelector(".mapw svg");if(!e)return null;const r=e.getBoundingClientRect();return{r,u:Math.max(Z.w/r.width,Z.h/r.height)}}
@@ -167,7 +174,7 @@ function rst(){Z.x=-350;Z.y=-130;Z.w=1300;Z.h=960;vb()}
 const pdist=()=>{const a=[...PT.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])};
 {const A=document.getElementById("app");
 A.addEventListener("wheel",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;e.preventDefault();const q=pt(e.clientX,e.clientY);zoom(e.deltaY<0?1.2:1/1.2,q[0],q[1])},{passive:false});
-A.addEventListener("pointerdown",e=>{if(!e.target.closest||!e.target.closest(".mapw")||e.target.closest(".zc"))return;PT.set(e.pointerId,[e.clientX,e.clientY]);Z.moved=0;Z.sx=e.clientX;Z.sy=e.clientY;pd=PT.size==2?pdist():0});
+A.addEventListener("pointerdown",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;PT.set(e.pointerId,[e.clientX,e.clientY]);Z.moved=0;Z.sx=e.clientX;Z.sy=e.clientY;pd=PT.size==2?pdist():0});
 A.addEventListener("pointermove",e=>{
  if(!PT.has(e.pointerId))return;const o=PT.get(e.pointerId);PT.set(e.pointerId,[e.clientX,e.clientY]);
  if(PT.size==2){const d=pdist(),a=[...PT.values()],q=pt((a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2);if(pd)zoom(d/pd,q[0],q[1]);pd=d;Z.moved=1}
@@ -182,8 +189,8 @@ function tone(f,d,ty,v,w){if(!CFG.snd)return;try{AC=AC||new(window.AudioContext|
 const SND={click:()=>tone(660,.06,"triangle",.09),deploy:()=>{tone(440,.08,"square",.07);tone(660,.1,"square",.07,.07)},attack:()=>{tone(180,.25,"sawtooth",.15);tone(120,.3,"sawtooth",.13,.1)},conquer:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.18,"triangle",.15,i*.1)),fail:()=>{tone(220,.2,"sawtooth",.12);tone(165,.35,"sawtooth",.12,.15)},turn:()=>{tone(523,.12,"triangle",.11);tone(784,.2,"triangle",.11,.1)},q:()=>{tone(392,.1,"sine",.11);tone(523,.1,"sine",.11,.1);tone(659,.18,"sine",.11,.2)},qr:()=>[659,784,988].forEach((f,i)=>tone(f,.15,"triangle",.13,i*.09)),win:()=>[523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,.22,"triangle",.16,i*.12)),tick:()=>tone(900,.05,"square",.06),rx:()=>tone(880,.07,"sine",.09)};
 const RX=[["😡","غاضب"],["😢","حزين"],["😂","يضحك"],["👏","أحسنت"],["😱","مصدوم"],["🔥","هجوم!"],["🤝","سلام"],["🤔","أفكر"],["⏳","أسرع"],["👑","الملك"],["😎","واثق"],["🙏","بالتوفيق"]];
 const pn1=p=>S&&S.names&&S.names[p]?String(S.names[p]).trim().split(/\s+/)[0]:"";
-const rxInner=()=>RXL.map(x=>{const el=Date.now()-x.t0;return `<div class="rxb" style="animation-delay:${-el}ms,${3600-el}ms"><span>${RX[x.i][0]}</span><small>${RX[x.i][1]}</small><b style="color:${PC[x.seat]}">:</b><i>${pn1(x.seat)}</i></div>`}).join("");
-function rxToggle(){const m=document.querySelector(".mapw");if(!m)return;let p=m.querySelector(".rxp");if(p){p.remove();return}p=document.createElement("div");p.className="rxp";p.innerHTML=RX.map((r,i)=>`<button onclick="rxSend(${i})">${r[0]}</button>`).join("");m.appendChild(p)}
+const rxInner=()=>RXL.map(x=>{const el=Date.now()-x.t0;return `<div class="rxb" style="animation-delay:${-el}ms,${3600-el}ms"><u>${DOT[x.seat]}</u><span>${RX[x.i][0]}</span><small>${RX[x.i][1]}</small><i>${pn1(x.seat)}</i></div>`}).join("");
+function rxToggle(){const m=document.getElementById("pTool")||document.querySelector(".mapw");if(!m)return;let p=m.querySelector(".rxp");if(p){p.remove();return}p=document.createElement("div");p.className="rxp";p.innerHTML=RX.map((r,i)=>`<button onclick="rxSend(${i})">${r[0]}</button>`).join("");m.appendChild(p)}
 function rxSend(i){const p=document.querySelector(".rxp");if(p)p.remove();if(Date.now()-RXC<2500)return;RXC=Date.now();act("rx",i)}
 function rxAdd(r){RXL.push({id:r.id,seat:r.seat,i:r.i,t0:Date.now()});if(RXL.length>5)RXL.shift();SND.rx();const e=document.querySelector(".rxs");if(e)e.innerHTML=rxInner();setTimeout(()=>{RXL=RXL.filter(x=>x.id!=r.id);const e2=document.querySelector(".rxs");if(e2)e2.innerHTML=rxInner()},4300)}
 function qAlert(){
@@ -199,7 +206,7 @@ function openHelp(){
  closeHelp();const d=document.createElement("div");d.id="helpm";d.className="mod";d.onclick=e=>{if(e.target==d)closeHelp()};
  d.innerHTML=`<div class="mc an hlp"><h3>📖 التعليمات والقواعد</h3>
 <h4>الفكرة</h4><p>جيوشك تأتيك من معرفتك: تجيب عن أسئلة رقمية فتكسب جيوشاً، ثم تستخدمها لتحتل الخريطة. لا نرد ولا حظ.</p>
-<h4>مراحل كل جولة</h4><ol><li><b>السؤال:</b> يكتب كل لاعب تقديره سراً.</li><li><b>النتيجة:</b> كل 10% من نسبة قربك من الجواب الصحيح = جيش (الجواب الدقيق 10، وبلا إجابة 0). أسئلة السنوات تُقاس على مقياس مناسب. الأقرب جواباً يأخذ وسام الحكمة 🏅.</li><li><b>أدوار اللاعبين</b> بالتناوب، ولكل لاعب: توزيع ثم هجوم ثم إعادة تمركز.</li></ol>
+<h4>مراحل كل جولة</h4><ol><li><b>السؤال:</b> يكتب كل لاعب تقديره سراً.</li><li><b>النتيجة:</b> كل 10% من نسبة قربك من الجواب الصحيح = جيش (الجواب الدقيق 10، وبلا إجابة 0). أسئلة السنوات تُقاس على مقياس مناسب. الأقرب جواباً يأخذ وسام الحكمة 🏅. وتختار عند البداية طريقة الإجابة: لوحة أرقام (الافتراضي) أو شريط سهل.</li><li><b>أدوار اللاعبين</b> بالتناوب، ولكل لاعب: توزيع ثم هجوم ثم إعادة تمركز.</li></ol>
 <h4>التوزيع</h4><p>في بداية دورك تأخذ جيشاً لكل 3 مناطق تملكها (حداً أدنى 2) مضافاً إلى ما كسبته من السؤال. اضغط على أرضك لتضع جيشاً في كل ضغطة.</p>
 <h4>الهجوم</h4><p>اختر أرضك (فيها جيشان فأكثر) ثم أرضاً مجاورة لعدوك، فتظهر نافذة تختار فيها عدد المهاجمين بـ + و − ثم ✓ للتأكيد أو ✗ للتراجع. يبقى في أرضك جيش واحد على الأقل.</p><ul><li><b>ينجح الهجوم</b> إذا زاد عدد المهاجمين على جيوش المدافعين ولو بواحد: تحتل الأرض ويبقى فيها الفرق (جيش على الأقل).</li><li><b>التعادل:</b> يفوز الأقرب جواباً منكما في سؤال الجولة، فإن تساويا فالمدافع.</li><li><b>الفشل:</b> يخسر الطرفان بالتساوي نصف ما أُرسل (المدافع يبقى فيه جيش على الأقل). الرقم أخضر في النافذة إن كان الهجوم ناجحاً وأحمر إن كان فاشلاً.</li></ul>
 <h4>إعادة التمركز</h4><p>نقلة واحدة: انقل جيوشاً من أرض لك إلى أرض أخرى لك متصلة بها عبر أراضيك، ثم ينتهي دورك.</p>
@@ -217,7 +224,7 @@ function openSet(){
  document.body.appendChild(d);$("cl").value=CFG.lab;
  $("cs").onchange=e=>{CFG.snd=e.target.checked;saveCfg();if(CFG.snd)SND.click()};$("cv").onchange=e=>{CFG.vib=e.target.checked;saveCfg();try{if(CFG.vib&&navigator.vibrate)navigator.vibrate(200)}catch(x){}};$("cfl").onchange=e=>{CFG.fl=e.target.checked;saveCfg()};$("ctt").onchange=e=>{CFG.tt=e.target.checked;saveCfg()};$("cnt").onchange=e=>{CFG.nt=e.target.checked;saveCfg();try{if(CFG.nt&&window.Notification&&Notification.permission=="default")Notification.requestPermission()}catch(x){}};$("cl").onchange=e=>{CFG.lab=e.target.value;saveCfg();vb()};
 }
-const BOTSH=`<p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
+const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
 const NET={role:"",conns:[],seat:0,ep:0,age:0,t:0};
 const OPTS=`<p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}<p>هدف الفوز: <select id="md" style="width:auto"><option value="all">احتلال جميع المناطق</option><option value="c5">احتلال 5 مناطق فوق ما تملك</option><option value="c8" selected>احتلال 8 مناطق فوق ما تملك</option><option value="c12">احتلال 12 منطقة فوق ما تملك</option><option value="a40">زيادة 40 جيشاً فوق ما تملك</option><option value="a80">زيادة 80 جيشاً فوق ما تملك</option><option value="a120">زيادة 120 جيشاً فوق ما تملك</option><option value="cap">احتلال العواصم</option></select></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>12</option><option selected>20</option><option>30</option><option value="0">لا نهائية</option></select></p>`;
 function bcast(){
@@ -313,7 +320,7 @@ function idleCheck(p){
 let hb=0;
 setInterval(()=>{NET.t++;if(NET.role=="host"){if(++hb%3==0)NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"ping"})})}else if(NET.role=="client"&&S&&S.multi&&S.ph!="end"&&!NET.mig&&++NET.age>12)lost()},1000);
 function lobby(){
- const a=$("app"),h=NET.role=="host",ids=["md","mr","tq","tr","td","ta","tf","bn","bd"],sv=ids.map(i=>$(i)&&$(i).value),sc=$("tmc")&&$("tmc").checked;
+ const a=$("app"),h=NET.role=="host",ids=["md","mr","tq","tr","td","ta","tf","bn","bd","am"],sv=ids.map(i=>$(i)&&$(i).value),sc=$("tmc")&&$("tmc").checked;
  let t=`<div class="side"><div class="card"><h2>غرفة اللعب</h2>`;
  if(NET.err)t+=`<p class="msg">تعذّر الاتصال: ${NET.err}</p>`;
  if(h){
@@ -329,9 +336,18 @@ function goOnline(){
  l.forEach((c,i)=>{c.seat=i+1;c.send({t:"hello",seat:i+1})});
  {const h=l.length+1,b=Math.min(+$("bn").value||0,8-h);start(h+b)}
 }
+function rangeFor(q){const a=q[1],sc=q[2],r=Math.random;let lo,hi;
+ if(sc){lo=a-sc*(.5+r()*2.5);hi=a+sc*(.5+r()*2.5)}else{lo=a*r()*.6;hi=Math.max(a*(2.5+r()*5),lo+10)}
+ lo=Math.max(0,lo);if(sc&&a>1500&&hi>2026)hi=2026;
+ const span=hi-lo,st=span<=3000?1:Math.pow(10,Math.floor(Math.log10(span/1000)));
+ lo=a-st*Math.round((a-lo)/st);if(lo<0)lo=a%st;hi=lo+st*Math.ceil((hi-lo)/st);if(hi<=a)hi=a+st*5;return[lo,hi,st]}
+function numOnly(e){e.value=e.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1")}
+function ansInput(){
+ if(S.ans=="bar"&&S.qr){const[lo,hi,st]=S.qr;let mid=lo+st*Math.round((hi-lo)/st/2);if(mid===S.q[1])mid=lo+st*Math.round((hi-lo)/st/3);return `<div class="qb"><b id="qbv">${mid}</b><input id="gv" type="range" min="${lo}" max="${hi}" step="${st}" value="${mid}" oninput="$('qbv').textContent=this.value"><div class="qbr"><span>${lo}</span><span>${hi}</span></div></div>`}
+ return `<input id="gv" type="${S.multi?"text":"password"}" inputmode="decimal" pattern="[0-9.]*" autocomplete="off" oninput="numOnly(this)">`}
 function qm(){
  const g=S.got||Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined),al=[...Array(S.n).keys()].filter(alive).length,k=g.filter(Boolean).length;
- return `<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p>`+(g[NET.seat]?`<p>سُجّلت إجابتك. بانتظار الآخرين (${k} من ${al}).</p>`:`<p>أنت <span class="dot" style="background:${PC[NET.seat]}"></span><b>${PN[NET.seat]}</b>: اكتب تقديرك:</p><input id="gv" type="password" inputmode="decimal" autocomplete="off"> <button onclick="act('guess')">تأكيد</button>`)+`<div class="msg">${S.msg}</div></div>`;
+ return `<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p>`+(g[NET.seat]?`<p>سُجّلت إجابتك. بانتظار الآخرين (${k} من ${al}).</p>`:`<p>أنت <span class="dot" style="background:${PC[NET.seat]}"></span><b>${PN[NET.seat]}</b>: اكتب تقديرك:</p>${ansInput()} <button onclick="act('guess')">تأكيد</button>`)+`<div class="msg">${S.msg}</div></div>`;
 }
 function act(t,a){
  if(t=="clk"&&Z.moved)return;
@@ -365,7 +381,7 @@ function apply(seat,t,a){
  else if(t=="endTurn"&&ph=="fortify")endTurn();
 }
 function start(n){
- QS=shuf(Q);S={n,bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:$("md")?$("md").value:"c8",max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:0,ep:0,act:[],idle:[],away:[]};
+ QS=shuf(Q);S={n,ans:$("am")?$("am").value:"num",bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:$("md")?$("md").value:"c8",max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:0,ep:0,act:[],idle:[],away:[]};
  for(let i=0;i<n;i++)S.P.push({res:0});
  let rest=[...Array(N).keys()];
  if(S.mode=="cap"){
@@ -380,7 +396,7 @@ function start(n){
 }
 function nextRound(){
  S.sel=S.tgt=null;S.r++;if(S.max&&S.r>S.max)return finish();
- if(!QS.length)QS=shuf(Q);S.q=QS[(S.r-1)%QS.length];S.gs=[];S.gi=0;S.ph="q";S.msg="";
+ if(!QS.length)QS=shuf(Q);S.q=QS[(S.r-1)%QS.length];S.qr=S.ans=="bar"?rangeFor(S.q):null;S.gs=[];S.gi=0;S.ph="q";S.msg="";
  if(S.multi){S.bots.forEach((b,p)=>{if(b&&alive(p))S.gs[p]=botGuess(p)});while(!alive(S.gi))S.gi++}else skipBots();
  if(!S.multi&&S.gi>=S.n)return results();render();
 }
@@ -564,7 +580,7 @@ function render0(){
  if(S.multi&&NET.role&&S.bots&&S.bots[NET.seat]&&S.away&&S.away[NET.seat])h=`<div class="card"><p>🤖 الحاسوب يلعب نيابةً عنك لأنك غبت دورين.</p><button onclick="act('resume')">▶ إكمال اللعبة</button></div>`+h;
  const h0=h;
  if(S.ph=="q"&&S.multi)modal=qm();
- else if(S.ph=="q")modal=`<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p><p><span class="dot" style="background:${PC[S.gi]}"></span><b>${PN[S.gi]}</b>، اكتب تقديرك سراً ولا ينظر غيرك:</p><input id="gv" type="password" inputmode="decimal" autocomplete="off"> <button onclick="act('guess')">تأكيد</button><div class="msg">${S.msg}</div></div>`;
+ else if(S.ph=="q")modal=`<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p><p><span class="dot" style="background:${PC[S.gi]}"></span><b>${PN[S.gi]}</b>، اكتب تقديرك سراً ولا ينظر غيرك:</p>${ansInput()} <button onclick="act('guess')">تأكيد</button><div class="msg">${S.msg}</div></div>`;
  else if(S.ph=="qr")modal=`<div class="card"><h3>الجواب: ${S.q[1]}</h3><table><tr><th>اللاعب</th><th>تقديره</th><th>القرب</th><th>جيوش</th></tr>${S.rt.map(x=>`<tr><td>${PN[x.p]}</td><td>${S.gs[x.p]==null||isNaN(S.gs[x.p])?"—":S.gs[x.p]}</td><td>${Math.round(x.c*100)}%</td><td>+${x.pts}${x.d==0?" 🎯":""}</td></tr>`).join("")}</table><p style="color:var(--mut);font-size:12px">الأقرب جواباً يأخذ <b>وسام الحكمة</b> 🏅: إذا تعادلت جيوشك مع جيوش خصمك في معركة يفوز الأقرب جواباً منكما.</p>${S.tm?"<p>تبدأ الأدوار تلقائياً عند انتهاء المؤقت.</p>":!S.multi||NET.role=="host"?`<button onclick="act('begin')">ابدأ الأدوار</button>`:"<p>بانتظار المضيف...</p>"}</div>`;
  else if(!my)h+=`<div class="card"><h3>دور ${PN[S.cur]}</h3><p>${S.bots&&S.bots[S.cur]?"🤖 الحاسوب يلعب":"انتظر دورك"}... ${nm(S.cur)}.</p><div class="msg">${S.msg}</div></div>`;
  else if(S.ph=="deploy")h+=`<div class="card"><h3>دور ${PN[S.cur]}: التوزيع</h3><div class="msg">${S.msg}</div><p>اضغط على أرضك لإضافة جيش. المتبقي: <b>${p.res}</b></p></div>`;
@@ -583,8 +599,7 @@ function render0(){
  h+=`<details><summary>القواعد</summary>سؤال رقمي كل جولة: كل 10% من نسبة قربك من الجواب الصحيح = جيش (قرب 20% يعطي جيشين، والجواب الدقيق 100% يعطي 10، وأقل من 10% لا شيء). في بداية دورك تأخذ جيشاً لكل 3 مناطق (حداً أدنى 2). تُرسل n جيشاً: إن زادت على مدافعي المنطقة (وعند التعادل يفوز الأقرب جواباً في سؤال الجولة وإلا فالمدافع) استوليت عليها وبقي لك الفرق، وإلا خسر الطرفان بالتساوي نصف ما أُرسل. المناطق المتجاورة هي التي تتشارك حدّاً على الخريطة. التوقيت: الأزمنة من إعدادات البداية (الافتراضي: سؤال 30ث، نتيجة 20ث ثم تبدأ الأدوار تلقائياً، توزيع 45ث، هجوم 60ث، تمركز 30ث)؛ عند انتهاء الوقت تُوزَّع الجيوش تلقائياً ويُنتقل للمرحلة التالية، ومن لم يجب لا يأخذ جيوشاً.</details>`;
  const mk=S.ph+"|"+S.r+"|"+(S.multi?"":S.gi),an=mk!=lastMk;lastMk=mk;
  const cf=(S.ph=="attack"||S.ph=="fortify")&&my&&S.sel!=null&&S.tgt!=null?cfHTML():"";
- DOCK=dock&&!cf?`<div class="dock">${dock}</div>`:"";
- app.innerHTML=`<div class="side">${h}</div>${mapw()}${DOCK}${cf}`+(modal?`<div class="mod"><div class="mc${an?" an":""}">${modal}${tmH(1)}</div></div>`:"");
+ paintGame(h,dock&&!cf?`<div class="dock">${dock}</div>`:"",cf,modal?`<div class="mod"><div class="mc${an?" an":""}">${modal}${tmH(1)}</div></div>`:"");
  fx();
 }
 restore();
