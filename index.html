@@ -28,7 +28,7 @@ input,select{-webkit-user-select:text;user-select:text}
 .cfb button{min-width:120px;font-size:17px}
 .dock .card{border:0;background:transparent;padding:0;margin:0 0 4px}.dock h3{font-size:15px;margin:0 0 4px}.dkt{font-size:13px;color:var(--mut);margin-inline-end:8px}
 #setm{z-index:8}
-.tool{display:flex;gap:6px;justify-content:center;align-items:center;position:relative}.tool button{width:46px;height:40px;padding:0;margin:0;font-size:21px;line-height:1}.cts{display:contents}.mapw .mv{position:absolute;inset:0}.qb{text-align:center}.qb b{font-size:36px}.qb input{width:100%;padding:0;margin:4px 0}.qbr{display:flex;justify-content:space-between;color:var(--mut);font-size:12px}
+.tool{display:flex;gap:6px;justify-content:center;align-items:center;position:relative}.tool button{width:46px;height:40px;padding:0;margin:0;font-size:21px;line-height:1}.cts{display:contents}.mapw .mv{position:absolute;inset:0}.qb{text-align:center}.qb b{font-size:36px}.qb input{flex:1;width:auto;padding:0;margin:4px 0}.qbs{display:flex;align-items:center;gap:6px}.qbs button{min-width:46px;height:42px;font-size:22px}.qbr{display:flex;justify-content:space-between;color:var(--mut);font-size:12px}
 .rxp{position:absolute;inset-inline-start:0;top:100%;margin-top:4px;display:grid;grid-template-columns:repeat(4,40px);gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:6px;z-index:4;box-shadow:0 8px 24px rgba(0,0,0,.35)}.rxp button{width:40px;height:40px;padding:0;margin:0;font-size:24px;background:transparent;border:0}
 .rxs{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:3px;pointer-events:none;z-index:3;direction:ltr;max-height:62%;overflow:hidden}
 .rxb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg);text-shadow:0 0 4px var(--bg),0 0 2px var(--bg);animation:rxin .35s both,rxout .6s both;direction:ltr}.rxb span{font-size:24px}.rxb u{text-decoration:none;font-size:14px}.rxb i{font-style:normal;font-size:12px}
@@ -68,7 +68,7 @@ details{font-size:12px;color:var(--mut)}
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-const V={Ua:[52.6,24.15],Ub:[54.3,24.45],Uh:[54.9,24.85],Uc:[55.3,25.3],Ud:[56.05,25.95],Ue:[56.35,25.5],Ob1:[53.8,20.5],Od:[58.0,20.4],Oc1:[58.6,23.7],Oc2:[59.8,22.5],Oc3:[57.6,18.9],Oc4:[54.1,17.0],Oc5:[56.2,18.0],Ou1:[55.8,24.2],Ou2:[56.4,24.8],Yb1:[45.8,15.4],Yb2:[47.0,14.7],Yb3:[44.6,14.4],Ych:[42.95,14.8],Ycs:[43.25,13.3],Yc1:[47.2,13.9],Yc2:[45.0,12.8],Yc3:[43.4,12.65],Ym1:[49.1,14.55],Yo1:[52.2,17.2],Yo2:[52.2,15.7],Lc:[35.5,33.9],Ld:[35.78,34.45],Sa:[36.4,33.9],Sb:[36.55,34.65],Sc:[35.95,34.65],Sd:[35.85,35.9],Se:[36.6,36.85],Sf:[38.5,36.9],Sg:[40.2,36.9],Kc1:[48.4,29.9],Kc2:[48.3,29.1],I1:[41.0,34.4],I2:[42.4,37.1],Ig:[43.9,37.15],I3:[44.8,37.15],I4:[45.2,36.0],I5:[45.9,35.2],I6:[45.5,34.3],I7:[46.2,33.1],I8:[47.5,32.3],I9:[47.95,31.0],I10:[48.0,30.05],I11:[47.5,29.45],Im1:[44.0,35.6],Im2:[42.7,34.4],Im3:[44.7,34.9],Iw1:[43.5,33.4],Iw2:[43.4,32.4],Ib1:[44.4,32.6],Ib3:[45.5,31.6],Ea:[25.15,31.57],Eb:[30.4,31.45],Ec:[32.3,31.25],Ed:[32.6,29.9],Ee:[32.4,29.5],Ef:[30.4,29.3],Eg:[25.15,29.3],Et:[25.15,23.9],Eh:[25.15,22.0],Ei:[36.9,22.0],Ej:[35.6,23.9],Ek:[34.9,25.1],El:[33.6,27.5],Er:[34.25,27.75],Ew:[33.2,28.4],Pf:[34.72,29.9],Pn1:[35.1,33.08],Pn2:[35.8,33.25],Pb1:[35.55,32.45],Pm1:[35.05,32.4],Pc1:[34.9,32.45],Pm2:[34.95,31.8],Pc2:[34.55,31.8],Pc3:[34.25,31.3],Pd1:[35.44,31.3],Pd2:[34.85,31.3],Pe:[34.95,29.5],Pg:[34.5,30.3],Ja:[37.95,30.83],Jb:[36.5,30.9],Jc:[38.51,31.5],Jw0:[35.0,29.6],Jw1:[35.3,30.5],Jw2:[35.55,31.95],Jw3:[35.6,32.6],Jm1:[37.4,31.6],Jm2:[36.2,31.95],Jm3:[37.1,31.95],Jz1:[39.2,32.3],Jz2:[38.8,33.37],Jz3:[37.2,32.35],Js1:[36.1,32.5],Js2:[35.75,32.72],a:[34.9,29.4],b:[36.6,29.3],c:[37.6,30.4],n:[39.0,32.1],i1:[41.5,31.2],i2:[44.0,29.2],k:[46.6,29.1],g1:[48.4,28.5],g2:[49.5,27.0],g3:[50.2,26.2],g4:[50.8,24.8],u1:[51.6,24.2],u2:[55.2,22.7],o1:[55.6,22.0],o2:[52.0,19.0],y1:[48.5,18.2],y2:[46.0,17.3],y3:[44.2,17.4],y4:[43.2,17.3],j1:[42.8,16.5],jj:[42.9,17.7],jc:[41.7,18.2],bh4:[41.3,19.5],bh1:[41.1,20.4],bh2:[42.6,20.5],bh3:[42.7,19.6],r2:[40.2,20.5],r3:[39.2,21.5],r4:[38.9,22.8],r5:[38.0,24.0],r6:[36.9,25.6],r7:[35.6,27.3],v2:[38.6,28.4],v3:[38.0,26.6],x1:[40.0,31.3],x2:[40.8,29.9],x3:[39.3,29.0],q1:[44.0,28.6],q2:[41.5,28.9],h1:[43.4,27.3],h2:[41.0,25.8],e1:[45.3,26.9],e2:[45.6,25.4],p1:[43.6,24.6],m1:[42.2,23.8],m2:[40.0,23.2],a1:[43.4,20.5],z1:[44.5,19.3],z2:[47.0,19.4],s1:[47.0,23.0],s2:[47.8,20.6]};
+const V={Qa1:[51.6,24.7],Qa2:[51.6,25.4],Qa3:[51.25,26.15],Qa4:[50.8,25.6],Qa5:[50.75,25.0],Bh1:[50.38,26.35],Bh2:[50.8,26.25],Bh3:[50.85,25.8],Bh4:[50.42,25.75],Ua:[52.6,24.15],Ub:[54.3,24.45],Uh:[54.9,24.85],Uc:[55.3,25.3],Ud:[56.05,25.95],Ue:[56.35,25.5],Ob1:[53.8,20.5],Od:[58.0,20.4],Oc1:[58.6,23.7],Oc2:[59.8,22.5],Oc3:[57.6,18.9],Oc4:[54.1,17.0],Oc5:[56.2,18.0],Ou1:[55.8,24.2],Ou2:[56.4,24.8],Yb1:[45.8,15.4],Yb2:[47.0,14.7],Yb3:[44.6,14.4],Ych:[42.95,14.8],Ycs:[43.25,13.3],Yc1:[47.2,13.9],Yc2:[45.0,12.8],Yc3:[43.4,12.65],Ym1:[49.1,14.55],Yo1:[52.2,17.2],Yo2:[52.2,15.7],Lc:[35.5,33.9],Ld:[35.78,34.45],Sa:[36.4,33.9],Sb:[36.55,34.65],Sc:[35.95,34.65],Sd:[35.85,35.9],Se:[36.6,36.85],Sf:[38.5,36.9],Sg:[40.2,36.9],Kc1:[48.4,29.9],Kc2:[48.3,29.1],I1:[41.0,34.4],I2:[42.4,37.1],Ig:[43.9,37.15],I3:[44.8,37.15],I4:[45.2,36.0],I5:[45.9,35.2],I6:[45.5,34.3],I7:[46.2,33.1],I8:[47.5,32.3],I9:[47.95,31.0],I10:[48.0,30.05],I11:[47.5,29.45],Im1:[44.0,35.6],Im2:[42.7,34.4],Im3:[44.7,34.9],Iw1:[43.5,33.4],Iw2:[43.4,32.4],Ib1:[44.4,32.6],Ib3:[45.5,31.6],Ea:[25.15,31.57],Eb:[30.4,31.45],Ec:[32.3,31.25],Ed:[32.6,29.9],Ee:[32.4,29.5],Ef:[30.4,29.3],Eg:[25.15,29.3],Et:[25.15,23.9],Eh:[25.15,22.0],Ei:[36.9,22.0],Ej:[35.6,23.9],Ek:[34.9,25.1],El:[33.6,27.5],Er:[34.25,27.75],Ew:[33.2,28.4],Pf:[34.72,29.9],Pn1:[35.1,33.08],Pn2:[35.8,33.25],Pb1:[35.55,32.45],Pm1:[35.05,32.4],Pc1:[34.9,32.45],Pm2:[34.95,31.8],Pc2:[34.55,31.8],Pc3:[34.25,31.3],Pd1:[35.44,31.3],Pd2:[34.85,31.3],Pe:[34.95,29.5],Pg:[34.5,30.3],Ja:[37.95,30.83],Jb:[36.5,30.9],Jc:[38.51,31.5],Jw0:[35.0,29.6],Jw1:[35.3,30.5],Jw2:[35.55,31.95],Jw3:[35.6,32.6],Jm1:[37.4,31.6],Jm2:[36.2,31.95],Jm3:[37.1,31.95],Jz1:[39.2,32.3],Jz2:[38.8,33.37],Jz3:[37.2,32.35],Js1:[36.1,32.5],Js2:[35.75,32.72],a:[34.9,29.4],b:[36.6,29.3],c:[37.6,30.4],n:[39.0,32.1],i1:[41.5,31.2],i2:[44.0,29.2],k:[46.6,29.1],g1:[48.4,28.5],g2:[49.5,27.0],g3:[50.2,26.2],g4:[50.8,24.8],u1:[51.6,24.2],u2:[55.2,22.7],o1:[55.6,22.0],o2:[52.0,19.0],y1:[48.5,18.2],y2:[46.0,17.3],y3:[44.2,17.4],y4:[43.2,17.3],j1:[42.8,16.5],jj:[42.9,17.7],jc:[41.7,18.2],bh4:[41.3,19.5],bh1:[41.1,20.4],bh2:[42.6,20.5],bh3:[42.7,19.6],r2:[40.2,20.5],r3:[39.2,21.5],r4:[38.9,22.8],r5:[38.0,24.0],r6:[36.9,25.6],r7:[35.6,27.3],v2:[38.6,28.4],v3:[38.0,26.6],x1:[40.0,31.3],x2:[40.8,29.9],x3:[39.3,29.0],q1:[44.0,28.6],q2:[41.5,28.9],h1:[43.4,27.3],h2:[41.0,25.8],e1:[45.3,26.9],e2:[45.6,25.4],p1:[43.6,24.6],m1:[42.2,23.8],m2:[40.0,23.2],a1:[43.4,20.5],z1:[44.5,19.3],z2:[47.0,19.4],s1:[47.0,23.0],s2:[47.8,20.6]};
 const R=[
 ["تبوك","a b c v2 v3 r6 r7",[36.7,28.4]],
 ["الجوف","c Ja Jc n x1 x2 x3 v2",[39.4,30.3]],
@@ -88,7 +88,7 @@ const R=[
 ["العريش","Pc3 Pg Pf Ed Ec"],["شرم الشيخ","Pf Pe Er Ew Ed"],["القاهرة","Eb Ec Ed Ee Ef"],["الإسكندرية","Ea Eb Ef Eg"],["الأقصر","Eg Ef Ee El Ek Ej Et"],["أسوان","Et Ej Ei Eh"],
 ["الرمادي","n Jz1 Jz2 I1 Im2 Iw1 Iw2 i1"],["الموصل","I1 I2 Ig I3 I4 I5 Im3 Im1 Im2"],["بغداد","Im2 Im1 Im3 I5 I6 I7 Ib1 Iw2 Iw1"],["البصرة","i1 Iw2 Ib1 I7 I8 I9 I10 I11 k i2"],
 ["الكويت","k I11 I10 Kc1 Kc2 g1"],
-["دمشق","Js2 Pn2 Sa Sb I1 Jz2 Jz3 Js1"],["حلب","Sb Sc Sd Se Sf Sg I2 I1"],["بيروت","Pn1 Pn2 Sa Sb Sc Ld Lc"],["صنعاء","j1 y4 y3 y2 Yb1 Yb3 Ycs Ych"],["عدن","Yb3 Yb1 Yb2 Yc1 Yc2 Yc3 Ycs"],["المكلا","y2 y1 o2 Yo1 Yo2 Ym1 Yc1 Yb2 Yb1"],["مسقط","u2 Ou1 Ou2 Oc1 Oc2 Od Ob1 o1"],["صلالة","Ob1 Od Oc3 Oc5 Oc4 Yo2 Yo1 o2"],["أبوظبي","u1 Ua Ub Uh Ou1 u2"],["دبي","Uh Uc Ud Ue Ou2 Ou1"]
+["دمشق","Js2 Pn2 Sa Sb I1 Jz2 Jz3 Js1"],["حلب","Sb Sc Sd Se Sf Sg I2 I1"],["بيروت","Pn1 Pn2 Sa Sb Sc Ld Lc"],["صنعاء","j1 y4 y3 y2 Yb1 Yb3 Ycs Ych"],["عدن","Yb3 Yb1 Yb2 Yc1 Yc2 Yc3 Ycs"],["المكلا","y2 y1 o2 Yo1 Yo2 Ym1 Yc1 Yb2 Yb1"],["مسقط","u2 Ou1 Ou2 Oc1 Oc2 Od Ob1 o1"],["صلالة","Ob1 Od Oc3 Oc5 Oc4 Yo2 Yo1 o2"],["أبوظبي","u1 Ua Ub Uh Ou1 u2"],["دبي","Uh Uc Ud Ue Ou2 Ou1"],["الدوحة","g4 u1 Qa1 Qa2 Qa3 Qa4 Qa5"],["المنامة","Bh1 Bh2 Bh3 Bh4"]
 ].map(r=>({n:r[0],v:r[1].split(" "),l:r[2]}));
 const N=R.length,WIN=9,PN=["الأحمر","الأزرق","الأخضر","الذهبي","البنفسجي","البرتقالي","البني","الرمادي"],PC=["#c0392b","#2471a3","#1e8449","#b7950b","#7d3c98","#d35400","#8b5a2b","#9aa5ab"],DOT=["🔴","🔵","🟢","🟡","🟣","🟠","🟤","⚪"];
 const px=p=>[(p[0]-34)*34+20,(34-p[1])*34+10];
@@ -107,8 +107,9 @@ function inr(i){
  r.cx=bx;r.cy=by;r.th=deg;r.fn=Math.max(5,Math.min(22,m*1.05));r.fm=Math.max(3.5,Math.min(11,m*.7,free*.9/(r.n.length*.6)));
 }
 const ADJ=R.map((a,i)=>R.map((b,j)=>i!=j&&a.v.filter(x=>b.v.includes(x)).length>=2));
-R.forEach((r,i)=>{r.c=i<13?0:i<15?1:i<17?2:i<23?3:i<27?4:i<28?5:i<30?6:i<31?7:i<34?8:i<36?9:10;inr(i)});
-const CNN=["السعودية","الأردن","فلسطين","مصر","العراق","الكويت","سوريا","لبنان","اليمن","عُمان","الإمارات"],CN=[];
+[["المنامة","الشرقية"],["المنامة","الدوحة"]].forEach(([a,b])=>{const i=R.findIndex(r=>r.n==a),j=R.findIndex(r=>r.n==b);if(i>=0&&j>=0)ADJ[i][j]=ADJ[j][i]=true});
+R.forEach((r,i)=>{r.c=i<13?0:i<15?1:i<17?2:i<23?3:i<27?4:i<28?5:i<30?6:i<31?7:i<34?8:i<36?9:i<38?10:i<39?11:12;inr(i)});
+const CNN=["السعودية","الأردن","فلسطين","مصر","العراق","الكويت","سوريا","لبنان","اليمن","عُمان","الإمارات","قطر","البحرين"],CN=[];
 function cpl(c){
  const ps=R.filter(r=>r.c==c),cnt={},E=[],key=(a,b)=>a<b?a+"|"+b:b+"|"+a;
  ps.forEach(r=>r.v.forEach((a,j)=>{const k=key(a,r.v[(j+1)%r.v.length]);cnt[k]=(cnt[k]||0)+1}));
@@ -212,7 +213,7 @@ function openHelp(){
 <h4>إعادة التمركز</h4><p>نقلة واحدة: انقل جيوشاً من أرض لك إلى أرض أخرى لك متصلة بها عبر أراضيك، ثم ينتهي دورك.</p>
 <h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين، ويفوز من يحتل عواصم الجميع.</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
 <h4>الوقت</h4><p>لكل مرحلة مؤقت قابل للتعديل عند البداية. زر <b>⏭ تجاوز الوقت</b> بعد تأكيدك يُكمل الحاسوب الإجراء عنك تلقائياً (يوزع جيوشك عشوائياً، أو يترك الهجوم، أو ينهي التمركز).</p>
-<h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم.</p>
+<h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم، والبحرين (جزيرة) متصلة بالشرقية وقطر عبر الجسر والبحر القريب.</p>
 <h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره، ثم 👤 لإعادته.</p>
 <h4>التعليقات السريعة</h4><p>زر 💬 على الخريطة يفتح رموز المشاعر (غاضب، حزين، يضحك...). اضغط واحداً فيظهر للجميع أسفل يسار الخريطة ويصعد كالبث مع كلمة صغيرة ثم يختفي بعد ثوانٍ.</p><h4>تنبيه بداية السؤال</h4><p>عند بدء كل سؤال: اهتزاز طويل (أندرويد) ووميض للشاشة، ووميض لعنوان التبويب وإشعار إن كانت الصفحة في الخلفية. تختار منها من الإعدادات.</p><h4>الحاسوب</h4><p>ثلاثة مستويات (سهل ومتوسط وصعب). دقة إجاباته تتموّج بين الجولات حسب قوة كل حاسوب، فلا يكون قوياً دائماً.</p>
 <button onclick="closeHelp()">تم</button></div>`;
@@ -336,14 +337,18 @@ function goOnline(){
  l.forEach((c,i)=>{c.seat=i+1;c.send({t:"hello",seat:i+1})});
  {const h=l.length+1,b=Math.min(+$("bn").value||0,8-h);start(h+b)}
 }
-function rangeFor(q){const a=q[1],sc=q[2],r=Math.random;let lo,hi;
- if(sc){lo=a-sc*(.5+r()*2.5);hi=a+sc*(.5+r()*2.5)}else{lo=a*r()*.6;hi=Math.max(a*(2.5+r()*5),lo+10)}
- lo=Math.max(0,lo);if(sc&&a>1500&&hi>2026)hi=2026;
- const span=hi-lo,st=span<=3000?1:Math.pow(10,Math.floor(Math.log10(span/1000)));
- lo=a-st*Math.round((a-lo)/st);if(lo<0)lo=a%st;hi=lo+st*Math.ceil((hi-lo)/st);if(hi<=a)hi=a+st*5;return[lo,hi,st]}
+const fmt=v=>v>=10000?Number(v).toLocaleString("en"):String(v);
+function rangeFor(q){
+ const a=q[1],sc=q[2],r=Math.random,smax=Math.max(1,sc?sc*.5:a/14),smin=Math.max(1,sc?sc*.1:a/40),NS=[];
+ for(let e=0;e<=7;e++)for(const m of[1,2,5])NS.push(m*Math.pow(10,e));
+ let c=NS.filter(x=>x>=smin&&x<=smax);if(!c.length)c=[Math.max(1,Math.round(smax))];
+ const st=c[Math.floor(r()*c.length)],kmax=Math.min(14,Math.floor(a/st)),k=Math.floor(r()*(kmax+1)),lo=a-k*st;
+ return[lo,lo+14*st,st,k]}
 function numOnly(e){e.value=e.value.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^0-9.]/g,"").replace(/(\..*)\./g,"$1")}
+function bsh(){const e=$("gv"),v=$("qbv");if(e&&v)v.textContent=fmt(+e.value)}
+function bst(d){const e=$("gv");if(!e)return;e.value=+e.value+d*(+e.step);bsh()}
 function ansInput(){
- if(S.ans=="bar"&&S.qr){const[lo,hi,st]=S.qr;let mid=lo+st*Math.round((hi-lo)/st/2);if(mid===S.q[1])mid=lo+st*Math.round((hi-lo)/st/3);return `<div class="qb"><b id="qbv">${mid}</b><input id="gv" type="range" min="${lo}" max="${hi}" step="${st}" value="${mid}" oninput="$('qbv').textContent=this.value"><div class="qbr"><span>${lo}</span><span>${hi}</span></div></div>`}
+ if(S.ans=="bar"&&S.qr){const[lo,hi,st,k]=S.qr,di=k==7?6:7,v=lo+di*st;return `<div class="qb"><b id="qbv">${fmt(v)}</b><div class="qbs"><button class="s" onclick="bst(-1)">−</button><input id="gv" type="range" min="${lo}" max="${hi}" step="${st}" value="${v}" oninput="bsh()"><button class="s" onclick="bst(1)">+</button></div><div class="qbr"><span>${fmt(lo)}</span><span>${fmt(hi)}</span></div></div>`}
  return `<input id="gv" type="${S.multi?"text":"password"}" inputmode="decimal" pattern="[0-9.]*" autocomplete="off" oninput="numOnly(this)">`}
 function qm(){
  const g=S.got||Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined),al=[...Array(S.n).keys()].filter(alive).length,k=g.filter(Boolean).length;
@@ -569,7 +574,7 @@ function mapSvg(){
  }
  return s+'</svg>';
 }
-function render(){const e=$("gv"),v=e?e.value:"",f0=e&&document.activeElement==e;render0();const g=$("gv");if(g&&v){g.value=v;if(f0)g.focus()}bcast();scheduleBot();save()}
+function render(){const e=$("gv"),v=e?e.value:"",f0=e&&document.activeElement==e;render0();const g=$("gv");if(g&&v){g.value=v;if(f0)g.focus();if(g.type=="range")bsh()}bcast();scheduleBot();save()}
 function render0(){
  const app=$("app");DOCK="";
  if(!S&&NET.role)return lobby();
