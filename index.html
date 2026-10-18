@@ -178,6 +178,7 @@ function seaPl(n,A,B){
  const free=Math.hypot(pts[i1][0]-pts[i0][0],pts[i1][1]-pts[i0][1]);
  return{n,x:pts[bi][0],y:pts[bi][1],deg:Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI,s:Math.max(6,Math.min(16,bm*.8,free*.95/(n.length*.6)))};
 }
+const CAM={raf:0,focus:0,user:0,sel:null,tgt:null,ev:0,T:null,ph:"",ht:0};
 let MAPKEY="",MAPCFG={};
 const MAIN=["الرياض","عمّان","القدس","القاهرة","بغداد","الكويت","دمشق","بيروت","صنعاء","مسقط","أبوظبي","الدوحة","المنامة","أنقرة","الخرطوم","طهران","طرابلس","تونس"];
 const MGRP={0:[["الرياض","القصيم","حائل","الشرقية","الحدود الشمالية","الجوف"],["مكة","المدينة","تبوك","الباحة","عسير","نجران","جازان"]],3:[["القاهرة","الإسكندرية","العريش","شرم الشيخ"],["أسوان","الأقصر"]],4:[["بغداد","الموصل"],["البصرة"]],8:[["صنعاء","عدن"],["المكلا"]],13:[["أنقرة","إسطنبول","إزمير"],["ديار بكر","أرضروم"]],14:[["الخرطوم","دنقلا","بورتسودان","الشمالية"],["الفاشر","نيالا","الأبيض","كادقلي"]],15:[["طهران","تبريز","مشهد","أصفهان"],["شيراز","الأهواز","كرمان","زاهدان"]],16:[["طرابلس","سرت","سبها","الجفرة"],["بنغازي","الكفرة","تازربو"]]};
@@ -236,7 +237,7 @@ function buildMap(cfg){
  [["المنامة","الشرقية"],["المنامة","الدوحة"]].forEach(([a,b])=>{const i=R.findIndex(r=>r.o.includes(a)),j=R.findIndex(r=>r.o.includes(b));if(i>=0&&j>=0&&i!=j)ADJ[i][j]=ADJ[j][i]=true});
  CN=[];CNN.forEach((n,c)=>{if(R.some(r=>r.c==c))CN.push(cpl(c))});
  LP=R.map(r=>r.v.map(k=>px(V[k])));
- fitView();
+ fitView();try{camReset()}catch(e){}
  const has=cs=>cs.some(c=>R.some(r=>r.c==c));
  SEA=[seaPl("البحر الأحمر",[34.6,27.4],[37.4,23.2]),seaPl("البحر المتوسط",[26.5,32.3],[33.0,32.3]),seaPl("الخليج العربي",[50.4,27.6],[53.2,25.4])].filter((_,i)=>has([[0,3,14,8],[3,16,17,6,7,2,13],[0,4,5,11,12,10,15]][i]));
 }
@@ -308,23 +309,88 @@ function reMap(){PT.clear();pd=0;Z.moved=0;closeSet();render()}
 function vb(){const e=document.querySelector(".mapw svg");if(e){e.setAttribute("viewBox",`${Z.x} ${Z.y} ${Z.w} ${Z.h}`);const l=lod();e.style.setProperty("--c",l.c);e.style.setProperty("--k",l.k);e.style.setProperty("--s",l.s)}}
 function geo(){const e=document.querySelector(".mapw svg");if(!e)return null;const r=e.getBoundingClientRect();return{r,u:Math.max(Z.w/r.width,Z.h/r.height)}}
 function pt(x,y){const k=geo();return k?[Z.x+(x-k.r.left-(k.r.width-Z.w/k.u)/2)*k.u,Z.y+(y-k.r.top-(k.r.height-Z.h/k.u)/2)*k.u]:[Z.x+Z.w/2,Z.y+Z.h/2]}
-function zoom(f,cx,cy){
+function zoom(f,cx,cy){camStop();CAM.user=1;
  const nw=Math.min(3400,Math.max(90,Z.w/f)),k=nw/Z.w;
  if(cx==null){cx=Z.x+Z.w/2;cy=Z.y+Z.h/2}
  Z.x=cx-(cx-Z.x)*k;Z.y=cy-(cy-Z.y)*k;Z.w=nw;Z.h*=k;vb();
 }
+function polyArea(P){let a=0;for(let i=0;i<P.length;i++){const p=P[i],q=P[(i+1)%P.length];a+=p[0]*q[1]-q[0]*p[1]}return Math.abs(a)/2}
+function pickRegion(x,y,el){
+ const g=el&&el.closest&&el.closest("[data-i]");const idx=g?+g.getAttribute("data-i"):-1;
+ const k=geo();if(!k)return idx;
+ const sz=i=>Math.sqrt(polyArea(LP[i]))/k.u;
+ if(idx>=0&&sz(idx)<36)return idx;
+ const p=pt(x,y);let best=-1,bd=1e9;
+ R.forEach((r,i)=>{const s=sz(i);if(s>=36)return;const d=Math.hypot(p[0]-r.cx,p[1]-r.cy)/k.u;if(d<Math.min(24,Math.max(14,s))&&d<bd){bd=d;best=i}});
+ return best>=0?best:idx;
+}
+const camMode=()=>CFG.cam!=null?+CFG.cam:((window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)?0:1);
+function camReset(){camStop();if(CAM.ht){clearTimeout(CAM.ht);CAM.ht=0}CAM.focus=0;CAM.user=0;CAM.T=null;CAM.sel=CAM.tgt=null;CAM.ev=0;CAM.ph=""}
+function camStop(){if(CAM.raf){cancelAnimationFrame(CAM.raf);CAM.raf=0}}
+function camBounds(ids){let a=1e9,b=-1e9,c=1e9,d=-1e9;ids.forEach(i=>{if(i==null||!LP[i])return;LP[i].forEach(q=>{a=Math.min(a,q[0]);b=Math.max(b,q[0]);c=Math.min(c,q[1]);d=Math.max(d,q[1])})});return a>b?null:{a,b,c,d}}
+function camTarget(B,minW,margin){
+ if(!B)return null;const k=geo(),asp=k?k.r.width/k.r.height:Z.w/Z.h;
+ let w=(B.b-B.a)+2*margin,h=(B.d-B.c)+2*margin;w=Math.max(w,minW);h=Math.max(h,minW/asp);
+ if(w/h>asp)h=w/asp;else w=h*asp;
+ const cx=(B.a+B.b)/2,cy=(B.c+B.d)/2;return{x:cx-w/2,y:cy-h/2,w,h};
+}
+function camFly(T){
+ if(!T)return;camStop();
+ const x0=Z.x,y0=Z.y,w0=Z.w,h0=Z.h,cx0=x0+w0/2,cy0=y0+h0/2,cx1=T.x+T.w/2,cy1=T.y+T.h/2;
+ const dist=Math.hypot(cx1-cx0,cy1-cy0);
+ if(dist<3&&Math.abs(w0-T.w)<3)return;
+ if(typeof requestAnimationFrame=="undefined"){Z.x=T.x;Z.y=T.y;Z.w=T.w;Z.h=T.h;vb();return}
+ const pull=Math.min(1,dist/Math.max(w0,T.w)*.7),dur=Math.max(450,Math.min(950,380+dist*.55));
+ const t0=performance.now();let last=t0,slow=0;
+ const fin=()=>{Z.x=T.x;Z.y=T.y;Z.w=T.w;Z.h=T.h;vb();CAM.raf=0};
+ const step=now=>{
+  if(now-last>60)slow++;last=now;if(slow>=3){fin();return}
+  const t=Math.min(1,(now-t0)/dur),e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,f=1+pull*Math.sin(Math.PI*e);
+  const w=Math.exp(Math.log(w0)+(Math.log(T.w)-Math.log(w0))*e)*f,h=Math.exp(Math.log(h0)+(Math.log(T.h)-Math.log(h0))*e)*f;
+  const cx=cx0+(cx1-cx0)*e,cy=cy0+(cy1-cy0)*e;
+  Z.w=Math.min(3400,w);Z.h=h*(Z.w/w);Z.x=cx-Z.w/2;Z.y=cy-Z.h/2;vb();
+  if(t<1)CAM.raf=requestAnimationFrame(step);else fin();
+ };
+ CAM.raf=requestAnimationFrame(step);
+}
+function camHome(){CAM.ht=0;if(CAM.user||!CAM.focus)return;CAM.focus=0;const B=camBounds(R.map((_,i)=>i));camFly(camTarget(B,200,40))}
+function camHomeSoon(ms){if(CAM.ht)clearTimeout(CAM.ht);CAM.ht=setTimeout(camHome,ms)}
+function camVisible(B){const k=geo();if(!k||!B)return true;const m=.08,ins=B.a>=Z.x+Z.w*m&&B.b<=Z.x+Z.w*(1-m)&&B.c>=Z.y+Z.h*m&&B.d<=Z.y+Z.h*(1-m);return ins&&Math.max(B.b-B.a,B.d-B.c)/k.u>=30}
+function camFocus(ids,minW,margin,force){
+ const B=camBounds(ids);if(!B)return;
+ if(!force&&camVisible(B))return;
+ if(CAM.ht){clearTimeout(CAM.ht);CAM.ht=0}
+ CAM.focus=1;CAM.user=0;camFly(camTarget(B,minW,margin));
+}
+function camUpdate(){
+ const m=camMode();
+ if(!S||S.ph=="end"||!geo())return;
+ const sel=S.sel,tgt=S.tgt,ev=S.ev?S.ev.id:0;
+ if(CAM.T==null||CAM.T.length!=S.T.length){CAM.T=S.T.slice();CAM.sel=sel;CAM.tgt=tgt;CAM.ev=ev;CAM.ph=S.ph;return}
+ const ch=[];S.T.forEach((t,i)=>{if(t!==CAM.T[i])ch.push(i)});
+ const mine=!S.multi||S.cur==NET.seat,selCh=sel!==CAM.sel||tgt!==CAM.tgt,evNew=ev!==CAM.ev,phCh=S.ph!==CAM.ph,pSel=CAM.sel,pTgt=CAM.tgt;
+ CAM.T=S.T.slice();CAM.sel=sel;CAM.tgt=tgt;CAM.ev=ev;CAM.ph=S.ph;
+ if(!m)return;
+ if(phCh&&(S.ph=="q"||S.ph=="qr")){camHomeSoon(250);return}
+ if(m==2&&evNew){const ids=ch.length?ch:(pTgt!=null?[pTgt]:[]);if(ids.length){camFocus(ids,420,70,true);camHomeSoon(2200);return}}
+ if(sel!=null&&selCh){
+  if(!mine&&m<2)return;
+  camFocus(tgt!=null?[sel,tgt]:[sel],340,60,m==2);return}
+ if(sel==null&&pSel!=null&&selCh){camHomeSoon(1300)}
+ else if(m==2&&!mine&&ch.length){camFocus(ch,420,70,true);camHomeSoon(2200)}
+}
 function fitView(){try{if(!LP.length)return;let a=1e9,b=-1e9,c=1e9,d=-1e9;LP.forEach(p=>p.forEach(q=>{a=Math.min(a,q[0]);b=Math.max(b,q[0]);c=Math.min(c,q[1]);d=Math.max(d,q[1])}));const m=40;Z.x=a-m;Z.y=c-m;Z.w=b-a+2*m;Z.h=d-c+2*m;Z.moved=0}catch(e){}}
-function rst(){fitView();vb()}
+function rst(){camStop();CAM.user=0;CAM.focus=1;const B=camBounds(R.map((_,i)=>i));if(!B){fitView();vb();return}camFly(camTarget(B,200,40));CAM.focus=0}
 const pdist=()=>{const a=[...PT.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])};
 {const A=document.getElementById("app");
 A.addEventListener("wheel",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;e.preventDefault();const q=pt(e.clientX,e.clientY);zoom(e.deltaY<0?1.2:1/1.2,q[0],q[1])},{passive:false});
-A.addEventListener("pointerdown",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;PT.set(e.pointerId,[e.clientX,e.clientY]);Z.moved=0;Z.sx=e.clientX;Z.sy=e.clientY;pd=PT.size==2?pdist():0});
+A.addEventListener("pointerdown",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;camStop();PT.set(e.pointerId,[e.clientX,e.clientY]);Z.moved=0;Z.sx=e.clientX;Z.sy=e.clientY;pd=PT.size==2?pdist():0});
 A.addEventListener("pointermove",e=>{
  if(!PT.has(e.pointerId))return;const o=PT.get(e.pointerId);PT.set(e.pointerId,[e.clientX,e.clientY]);
  if(PT.size==2){const d=pdist(),a=[...PT.values()],q=pt((a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2);if(pd)zoom(d/pd,q[0],q[1]);pd=d;Z.moved=1}
  else{if(!Z.moved&&Math.hypot(e.clientX-Z.sx,e.clientY-Z.sy)<(e.pointerType=="touch"?14:6))return;Z.moved=1;const k=geo();if(!k)return;Z.x-=(e.clientX-o[0])*k.u;Z.y-=(e.clientY-o[1])*k.u;vb()}
 });
-const up=e=>{const tap=e.type=="pointerup"&&PT.size==1&&PT.has(e.pointerId)&&!Z.moved;PT.delete(e.pointerId);pd=0;if(tap){const el=document.elementFromPoint(e.clientX,e.clientY),g=el&&el.closest&&el.closest("[data-i]");if(g)act("clk",+g.getAttribute("data-i"))}setTimeout(()=>{Z.moved=0},0)};
+const up=e=>{if(Z.moved&&PT.has(e.pointerId))CAM.user=1;const tap=e.type=="pointerup"&&PT.size==1&&PT.has(e.pointerId)&&!Z.moved;PT.delete(e.pointerId);pd=0;if(tap){const el=document.elementFromPoint(e.clientX,e.clientY),pi=pickRegion(e.clientX,e.clientY,el);if(pi>=0)act("clk",pi)}setTimeout(()=>{Z.moved=0},0)};
 A.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest(".mapw"))e.preventDefault()});A.addEventListener("selectstart",e=>{if(e.target.closest&&e.target.closest(".mapw"))e.preventDefault()});
 A.addEventListener("pointerup",up);A.addEventListener("pointercancel",up);}
 const CFG=(()=>{let o={snd:true,lab:"auto",vib:true,fl:true,tt:true,nt:false};try{o=Object.assign(o,JSON.parse(localStorage.getItem("asr_cfg")||"{}"))}catch(e){}return o})(),saveCfg=()=>{try{localStorage.setItem("asr_cfg",JSON.stringify(CFG))}catch(e){}};
@@ -362,15 +428,15 @@ function openHelp(){
 <h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين وتبدأ بخمسة جيوش (ستة إذا زاد اللاعبون على ثلاثة)، ويملك صاحبها أرضين بجانبها عند البداية. ويفوز من يحتل عواصم الجميع.</li><li>اختر نوع الهدف أولاً (مناطق، جيوش، عواصم) ثم يظهر خيار آخر لتحديد العدد: رقم جاهز أو «رقم أختاره»، أو «كل المناطق»، أو عدد عواصم الخصوم أو عواصمهم جميعاً.</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
 <h4>الوقت</h4><p>لكل مرحلة مؤقت قابل للتعديل عند البداية. زر <b>⏭ تجاوز الوقت</b> بعد تأكيدك يُكمل الحاسوب الإجراء عنك تلقائياً (يوزع جيوشك عشوائياً، أو يترك الهجوم، أو ينهي التمركز).</p>
 <h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم، والبحرين (جزيرة) متصلة بالشرقية وقطر عبر الجسر والبحر القريب.</p>
-<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). قبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 4 مناطق لكل لاعب على الأقل. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
+<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 4 مناطق لكل لاعب على الأقل. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
 <h4>التعليقات السريعة</h4><p>زر 💬 على الخريطة يفتح رموز المشاعر (غاضب، حزين، يضحك...). اضغط واحداً فيظهر للجميع أسفل يسار الخريطة ويصعد كالبث مع كلمة صغيرة ثم يختفي بعد ثوانٍ.</p><h4>تنبيه بداية السؤال</h4><p>عند بدء كل سؤال: اهتزاز طويل (أندرويد) ووميض للشاشة، ووميض لعنوان التبويب وإشعار إن كانت الصفحة في الخلفية. تختار منها من الإعدادات.</p><h4>الحاسوب</h4><p>ثلاثة مستويات (سهل ومتوسط وصعب). دقة إجاباته تتموّج بين الجولات حسب قوة كل حاسوب، فلا يكون قوياً دائماً.</p>
 <button onclick="closeHelp()">تم</button></div>`;
  document.body.appendChild(d)}
 function closeSet(){const d=document.getElementById("setm");if(d)d.remove()}
 function openSet(){
  closeSet();const d=document.createElement("div");d.id="setm";d.className="mod";d.onclick=e=>{if(e.target==d)closeSet()};
- d.innerHTML=`<div class="mc an"><h3>الإعدادات</h3><p><label><input type="checkbox" id="cs" ${CFG.snd?"checked":""} style="width:auto"> 🔊 الأصوات</label></p><p>تنبيه بداية السؤال:<br><label><input type="checkbox" id="cv" ${CFG.vib?"checked":""} style="width:auto"> 📳 اهتزاز طويل (أندرويد فقط)</label><br><label><input type="checkbox" id="cfl" ${CFG.fl?"checked":""} style="width:auto"> ✨ وميض الشاشة</label><br><label><input type="checkbox" id="ctt" ${CFG.tt?"checked":""} style="width:auto"> 🔤 وميض عنوان التبويب</label><br><label><input type="checkbox" id="cnt" ${CFG.nt?"checked":""} style="width:auto"> 🔔 إشعار المتصفح</label> <button class="s sm" onclick="qAlert()">جرّب</button></p><p>أسماء الأراضي على الخريطة:<br><select id="cl" style="width:auto"><option value="auto">تلقائي حسب التقريب</option><option value="countries">أسماء الدول فقط</option><option value="cities">أسماء المدن فقط</option></select></p><button class="s" onclick="openHelp()">📖 التعليمات</button><button class="s" onclick="reMap()">↻ إعادة تحميل الخريطة</button><button class="s" onclick="if(this.dataset.s)leave();else{this.dataset.s=1;this.textContent='اضغط للتأكيد'}">⎋ خروج</button><br><button onclick="closeSet()">تم</button></div>`;
- document.body.appendChild(d);$("cl").value=CFG.lab;
+ d.innerHTML=`<div class="mc an"><h3>الإعدادات</h3><p><label><input type="checkbox" id="cs" ${CFG.snd?"checked":""} style="width:auto"> 🔊 الأصوات</label></p><p>تنبيه بداية السؤال:<br><label><input type="checkbox" id="cv" ${CFG.vib?"checked":""} style="width:auto"> 📳 اهتزاز طويل (أندرويد فقط)</label><br><label><input type="checkbox" id="cfl" ${CFG.fl?"checked":""} style="width:auto"> ✨ وميض الشاشة</label><br><label><input type="checkbox" id="ctt" ${CFG.tt?"checked":""} style="width:auto"> 🔤 وميض عنوان التبويب</label><br><label><input type="checkbox" id="cnt" ${CFG.nt?"checked":""} style="width:auto"> 🔔 إشعار المتصفح</label> <button class="s sm" onclick="qAlert()">جرّب</button></p><p>أسماء الأراضي على الخريطة:<br><select id="cl" style="width:auto"><option value="auto">تلقائي حسب التقريب</option><option value="countries">أسماء الدول فقط</option><option value="cities">أسماء المدن فقط</option></select></p><p>حركة الكاميرا التلقائية:<br><select id="ccm" style="width:auto"><option value="0">إيقاف</option><option value="1">خفيفة (تقرّب عند الحاجة)</option><option value="2">كاملة (تتبع كل حركة)</option></select></p><button class="s" onclick="openHelp()">📖 التعليمات</button><button class="s" onclick="reMap()">↻ إعادة تحميل الخريطة</button><button class="s" onclick="if(this.dataset.s)leave();else{this.dataset.s=1;this.textContent='اضغط للتأكيد'}">⎋ خروج</button><br><button onclick="closeSet()">تم</button></div>`;
+ document.body.appendChild(d);$("cl").value=CFG.lab;$("ccm").value=camMode();$("ccm").onchange=e=>{CFG.cam=+e.target.value;saveCfg()};
  $("cs").onchange=e=>{CFG.snd=e.target.checked;saveCfg();if(CFG.snd)SND.click()};$("cv").onchange=e=>{CFG.vib=e.target.checked;saveCfg();try{if(CFG.vib&&navigator.vibrate)navigator.vibrate(200)}catch(x){}};$("cfl").onchange=e=>{CFG.fl=e.target.checked;saveCfg()};$("ctt").onchange=e=>{CFG.tt=e.target.checked;saveCfg()};$("cnt").onchange=e=>{CFG.nt=e.target.checked;saveCfg();try{if(CFG.nt&&window.Notification&&Notification.permission=="default")Notification.requestPermission()}catch(x){}};$("cl").onchange=e=>{CFG.lab=e.target.value;saveCfg();vb()};
 }
 const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
@@ -597,7 +663,7 @@ function apply(seat,t,a){
 const capM=()=>S.mode=="cap"||S.mode[0]=="k";
 function start(n){
  const mc=$("msc")?readMap():(S&&S.map)||{};if(!mapOk(mc,n))return;
- fitView();
+ fitView();camReset();
  QS=shuf(Q);S={map:mc,n,ans:$("am")?$("am").value:"num",bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:readMode(),max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:0,ep:0,act:[],idle:[],away:[]};
  for(let i=0;i<n;i++)S.P.push({res:0});
  let rest=[...Array(N).keys()];
@@ -853,7 +919,7 @@ function render0(){
  const sy=NET.role=="client"&&S.multi&&(NET.mig||!NET.fresh||NET.wait);
  const cf=!sy&&(S.ph=="attack"||S.ph=="fortify")&&my&&S.sel!=null&&S.tgt!=null?cfHTML():"";
  paintGame(h,!sy&&dock&&!cf?`<div class="dock">${dock}</div>`:"",cf,sy?syncHTML():(modal?`<div class="mod"><div class="mc${an?" an":""}">${modal}${tmH(1)}</div></div>`:""));
- if(!sy)fx();
+ if(!sy)fx();if(!sy){try{camUpdate()}catch(e){}}
  {const xb=$("xfb");if(xb)xb.style.display=NET.role=="host"&&S.multi&&S.ph!="end"?"":"none"}
 }
 restore();
