@@ -236,6 +236,7 @@ function buildMap(cfg){
  [["المنامة","الشرقية"],["المنامة","الدوحة"]].forEach(([a,b])=>{const i=R.findIndex(r=>r.o.includes(a)),j=R.findIndex(r=>r.o.includes(b));if(i>=0&&j>=0&&i!=j)ADJ[i][j]=ADJ[j][i]=true});
  CN=[];CNN.forEach((n,c)=>{if(R.some(r=>r.c==c))CN.push(cpl(c))});
  LP=R.map(r=>r.v.map(k=>px(V[k])));
+ fitView();
  const has=cs=>cs.some(c=>R.some(r=>r.c==c));
  SEA=[seaPl("البحر الأحمر",[34.6,27.4],[37.4,23.2]),seaPl("البحر المتوسط",[26.5,32.3],[33.0,32.3]),seaPl("الخليج العربي",[50.4,27.6],[53.2,25.4])].filter((_,i)=>has([[0,3,14,8],[3,16,17,6,7,2,13],[0,4,5,11,12,10,15]][i]));
 }
@@ -312,7 +313,8 @@ function zoom(f,cx,cy){
  if(cx==null){cx=Z.x+Z.w/2;cy=Z.y+Z.h/2}
  Z.x=cx-(cx-Z.x)*k;Z.y=cy-(cy-Z.y)*k;Z.w=nw;Z.h*=k;vb();
 }
-function rst(){Z.x=-900;Z.y=-300;Z.w=2000;Z.h=1160;vb()}
+function fitView(){try{if(!LP.length)return;let a=1e9,b=-1e9,c=1e9,d=-1e9;LP.forEach(p=>p.forEach(q=>{a=Math.min(a,q[0]);b=Math.max(b,q[0]);c=Math.min(c,q[1]);d=Math.max(d,q[1])}));const m=40;Z.x=a-m;Z.y=c-m;Z.w=b-a+2*m;Z.h=d-c+2*m;Z.moved=0}catch(e){}}
+function rst(){fitView();vb()}
 const pdist=()=>{const a=[...PT.values()];return Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])};
 {const A=document.getElementById("app");
 A.addEventListener("wheel",e=>{if(!e.target.closest||!e.target.closest(".mapw"))return;e.preventDefault();const q=pt(e.clientX,e.clientY);zoom(e.deltaY<0?1.2:1/1.2,q[0],q[1])},{passive:false});
@@ -392,7 +394,7 @@ const OPTS=`<p><label><input type="checkbox" id="tmc" checked style="width:auto"
 function bcast(){
  if(NET.role!="host"||!S)return;
  S.sq=(S.sq||0)+1;const o=JSON.parse(JSON.stringify(S));
- if(S.ph=="q"){o.got=Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined);o.gs=[]}
+ if(S.ph=="q"){o.got=Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined);o.gs=[];if(o.q)o.q=[o.q[0],null,o.q[2]]}
  NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"state",S:o})});
 }
 let migT=0;const hid=(c,e)=>"asr-"+String(c).toUpperCase().trim()+(e?"-"+e:"");
@@ -485,6 +487,7 @@ function probe(){
 function becomeHost(ep){
  if(NET.peer)try{NET.peer.destroy()}catch(e){}
  NET.role="host";NET.ep=ep;NET.mig=false;migT=0;NET.fresh=true;NET.wait=0;NET.conns=[];NET.ready=0;
+ if(S.q&&S.q[1]==null){const f=Q.find(x=>x[0]==S.q[0]);if(f)S.q=f}
  S.ep=ep;S.hs=NET.seat;S.ev={id:(S.ev?S.ev.id:0)+1,t:"🔁 انتقلت الاستضافة إلى "+dn(NET.seat),c:NET.seat};
  const pr=NET.peer=new Peer(hid(NET.code,ep));
  pr.on("disconnected",()=>{try{if(NET.peer===pr&&!pr.destroyed)pr.reconnect()}catch(e){}});
@@ -594,6 +597,7 @@ function apply(seat,t,a){
 const capM=()=>S.mode=="cap"||S.mode[0]=="k";
 function start(n){
  const mc=$("msc")?readMap():(S&&S.map)||{};if(!mapOk(mc,n))return;
+ fitView();
  QS=shuf(Q);S={map:mc,n,ans:$("am")?$("am").value:"num",bots:Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:$("bd")?+$("bd").value:1,lim:readLim(),multi:NET.role=="host",mode:readMode(),max:$("mr")?+$("mr").value:12,tm:$("tmc")?$("tmc").checked:true,t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:0,ep:0,act:[],idle:[],away:[]};
  for(let i=0;i<n;i++)S.P.push({res:0});
  let rest=[...Array(N).keys()];
