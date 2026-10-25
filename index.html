@@ -178,6 +178,7 @@ function seaPl(n,A,B){
  const free=Math.hypot(pts[i1][0]-pts[i0][0],pts[i1][1]-pts[i0][1]);
  return{n,x:pts[bi][0],y:pts[bi][1],deg:Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI,s:Math.max(6,Math.min(16,bm*.8,free*.95/(n.length*.6)))};
 }
+/* ============ الخريطة: بناء النطاق والتفصيل والكاميرا ============ */
 const CAM={raf:0,focus:0,user:0,sel:null,tgt:null,ev:0,T:null,ph:"",ht:0};
 let MAPKEY="",MAPCFG={};
 const MAIN=["الرياض","عمّان","القدس","القاهرة","بغداد","الكويت","دمشق","بيروت","صنعاء","مسقط","أبوظبي","الدوحة","المنامة","أنقرة","الخرطوم","طهران","طرابلس","تونس"];
@@ -243,13 +244,13 @@ function buildMap(cfg){
 }
 function mapOk(cfg,n){
  const prev=MAPCFG;
- if(countRegions(cfg)<4*n){alert("الخريطة المختارة صغيرة لهذا العدد من اللاعبين (تحتاج "+(4*n)+" منطقة على الأقل). اختر نطاقاً أو تفصيلاً أكبر.");return false}
+ if(countRegions(cfg)<6*n){alert("الخريطة المختارة صغيرة لهذا العدد من اللاعبين (تحتاج "+(6*n)+" منطقة على الأقل). اختر نطاقاً أو تفصيلاً أكبر.");return false}
  buildMap(cfg);
  if(!mapConnected()){buildMap(prev);alert("المناطق المختارة غير متصلة ببعضها (يفصل بينها دول غير مختارة). أضف الدول التي بينها أو اختر نطاقاً آخر.");return false}
  return true}
 const MAPSEL={sc:"all",lv:"0",x:[]};
 function readMap(){const m=$("msc"),l=$("mlv"),v=m?m.value:"all";let sc=null;if(v=="x"){sc=[];CNN.forEach((_,c)=>{const e=$("mc"+c);if(e&&e.checked)sc.push(c)})}else if(MAPP[v])sc=MAPP[v];return{sc,lv:l?+l.value:0}}
-function goalAuto(){const t=$("gt");if(!t)return;const n=countRegions(readMap());goalSync(String(t.value=="c"?(n<20?5:n<50?8:12):t.value=="a"?(n<30?40:80):"all"))}
+function goalAuto(){const t=$("gt");if(!t)return;const n=countRegions(readMap());goalSync(String(t.value=="c"?(n<20?5:n<50?8:12):t.value=="a"?"30":"all"))}
 function mapUi(u){
  const m=$("msc"),l=$("mlv");if(!m||!l)return;
  MAPSEL.sc=m.value;MAPSEL.lv=l.value;MAPSEL.x=CNN.map((_,c)=>{const e=$("mc"+c);return!!(e&&e.checked)});
@@ -257,7 +258,7 @@ function mapUi(u){
  const k=$("mcnt");if(k)k.textContent="("+countRegions(readMap())+" منطقة)";
  if(u)goalAuto();
 }
-function mapRestore(){const m=$("msc"),l=$("mlv");if(!m||!l)return;m.value=MAPSEL.sc;l.value=MAPSEL.lv;CNN.forEach((_,c)=>{const e=$("mc"+c);if(e)e.checked=!!MAPSEL.x[c]});mapUi(0)}
+function mapRestore(){const m=$("msc"),l=$("mlv");if(!m||!l)return;m.value=MAPSEL.sc;l.value=MAPSEL.lv;CNN.forEach((_,c)=>{const e=$("mc"+c);if(e)e.checked=!!MAPSEL.x[c]});QCC.forEach((_,i)=>{const e=$("qc"+i);if(e)e.checked=QSEL[i]});qcUi();mapUi(0)}
 if(typeof MutationObserver!="undefined"){try{new MutationObserver(()=>{const m=$("msc");if(m&&!m.dataset.i){m.dataset.i=1;mapRestore()}}).observe($("app"),{childList:true,subtree:true})}catch(e){}}
 buildMap({});
 const lod=()=>{const t=Math.max(0,Math.min(1,(Z.w-600)/600)),e=t*t*(3-2*t),u=Math.max(0,Math.min(1,(Z.w-350)/350)),sv=(u*u*(3-2*u)).toFixed(2);if(CFG.lab=="countries")return{c:"1.00",k:"0.00",s:sv};if(CFG.lab=="cities")return{c:"0.00",k:"1.00",s:sv};return{c:e.toFixed(2),k:(1-e).toFixed(2),s:sv}};
@@ -294,6 +295,20 @@ const Q=[
 ];
 const $=i=>document.getElementById(i);
 const LIM={q:30,qr:20,deploy:45,attack:60,fortify:30},L=()=>(S&&S.lim)||LIM,readLim=()=>{const g=(id,d)=>{const e=$(id),v=e?parseInt(e.value):NaN;return v>0?Math.min(600,v):d};return{q:g("tq",30),qr:g("tr",20),deploy:g("td",45),attack:g("ta",60),fortify:g("tf",30)}},PH=[["q","السؤال"],["qr","النتيجة"],["deploy","التوزيع"],["attack","الهجوم"],["fortify","التمركز"]];
+const QCN=["دين وسيرة","تاريخ","جغرافيا","علوم وعامة"],QCC=["d","h","g","s"];
+[[0,24,"d"],[25,32,"h"],[33,47,"g"],[48,51,"s"],[52,62,"g"],[63,70,"h"],[71,77,"s"],[78,79,"g"],[80,81,"s"],[82,87,"d"],[88,96,"h"],[97,101,"s"]].forEach(([a,b,c])=>{for(let i=a;i<=b;i++)Q[i][3]=c});
+const QSEL=[true,true,true,true];
+const SEEN=(()=>{try{return new Set(JSON.parse(localStorage.getItem("asr_seen")||"[]"))}catch(e){return new Set()}})();
+function seenSave(){try{localStorage.setItem("asr_seen",JSON.stringify([...SEEN].slice(-300)))}catch(e){}}
+function readCats(){const c=QCC.filter((_,i)=>{const e=$("qc"+i);return e?e.checked:true});return c.length?c:QCC.slice()}
+function qpool(cats){
+ const cs=cats&&cats.length?cats:QCC,pool=Q.filter(q=>cs.includes(q[3]));
+ let un=pool.filter(q=>!SEEN.has(q[0]));
+ if(un.length<Math.min(pool.length,12)){pool.forEach(q=>SEEN.delete(q[0]));seenSave();un=pool}
+ const seen=pool.filter(q=>!un.includes(q));
+ return[...shuf(un),...shuf(seen)];
+}
+function qcUi(){QCC.forEach((_,i)=>{const e=$("qc"+i);if(e)QSEL[i]=e.checked});const k=$("qcnt");if(k){const cs=readCats();k.textContent="("+Q.filter(q=>cs.includes(q[3])).length+" سؤال)"}}
 let RXL=[],RXT={},RXC=0,lastRx=0,qTT=0,CFN=1,cfKey="",S=null,QS=[],lastMk="",lastSk="",lastEv=-1,askSkip=false,botAsk=-1,xferAsk=-1,lastEnd="",DOCK="";
 const alive=p=>S.T.includes(p),cnt=p=>S.T.filter(t=>t==p).length;
 function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -430,24 +445,24 @@ function openHelp(){
 <h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين وتبدأ بخمسة جيوش (ستة إذا زاد اللاعبون على ثلاثة)، ويملك صاحبها أرضين بجانبها عند البداية. ويفوز من يحتل عواصم الجميع.</li><li>اختر نوع الهدف أولاً (مناطق، جيوش، عواصم) ثم يظهر خيار آخر لتحديد العدد: رقم جاهز أو «رقم أختاره»، أو «كل المناطق»، أو عدد عواصم الخصوم أو عواصمهم جميعاً.</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
 <h4>الوقت</h4><p>لكل مرحلة مؤقت قابل للتعديل عند البداية. زر <b>⏭ تجاوز الوقت</b> بعد تأكيدك يُكمل الحاسوب الإجراء عنك تلقائياً (يوزع جيوشك عشوائياً، أو يترك الهجوم، أو ينهي التمركز).</p>
 <h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم، والبحرين (جزيرة) متصلة بالشرقية وقطر عبر الجسر والبحر القريب.</p>
-<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها (مع كل المناطق المجاورة لها) إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 4 مناطق لكل لاعب على الأقل. وفي نهاية اللعبة زر «جولة جديدة بنفس اللاعبين» عند المضيف (أو في اللعب المحلي) يعيد البدء بنفس الإعدادات والأسماء. وفي غرفة المضيف زر «مشاركة رابط الدعوة» يرسل رابطاً يدخل منه اللاعب مباشرة إلى الغرفة (يعمل إذا كانت اللعبة مستضافة على موقع). وإذا انقطع اتصال لاعب وهو مطلوب منه حركة ولم يتحرك 10 ثوانٍ، يلعب الحاسوب مكانه فوراً (وتظهر عليه علامة 🔌) ثم يعود إليه التحكم تلقائياً عند رجوعه. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
+<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها (مع كل المناطق المجاورة لها) إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 6 مناطق لكل لاعب على الأقل. وفي نهاية اللعبة زر «جولة جديدة بنفس اللاعبين» عند المضيف (أو في اللعب المحلي) يعيد البدء بنفس الإعدادات والأسماء. وفي غرفة المضيف زر «مشاركة رابط الدعوة» يرسل رابطاً يدخل منه اللاعب مباشرة إلى الغرفة (يعمل إذا كانت اللعبة مستضافة على موقع). في أهداف العواصم تُحمى كل عاصمة في أول 3 جولات فلا يمكن الهجوم عليها قبل الجولة الرابعة. وهدف زيادة الجيوش صار نسبة من جيوشك عند البداية، وتُضاعف النسبة تلقائياً على الخرائط الصغيرة أو كثرة اللاعبين حتى لا تنتهي اللعبة بسرعة (ويظهر الرقم الفعلي في بطاقة الهدف). يمكنك اختيار تصنيفات الأسئلة (دين وسيرة، تاريخ، جغرافيا، علوم وعامة) قبل البدء. وتتجنب اللعبة الأسئلة التي ظهرت لك في جلسات سابقة على هذا الجهاز ما دام فيه أسئلة جديدة. وفي شاشة النهاية ملخص للمباراة: الفائز وترتيب اللاعبين وجوائز (الأدق تخميناً، أفضل تخمين، أكثر فوزاً بالأسئلة، الأكثر احتلالاً). وإذا انقطع اتصال لاعب وهو مطلوب منه حركة ولم يتحرك 10 ثوانٍ، يلعب الحاسوب مكانه فوراً (وتظهر عليه علامة 🔌) ثم يعود إليه التحكم تلقائياً عند رجوعه. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
 <h4>التعليقات السريعة</h4><p>زر 💬 على الخريطة يفتح رموز المشاعر (غاضب، حزين، يضحك...). اضغط واحداً فيظهر للجميع أسفل يسار الخريطة ويصعد كالبث مع كلمة صغيرة ثم يختفي بعد ثوانٍ.</p><h4>تنبيه بداية السؤال</h4><p>عند بدء كل سؤال: اهتزاز طويل (أندرويد) ووميض للشاشة، ووميض لعنوان التبويب وإشعار إن كانت الصفحة في الخلفية. تختار منها من الإعدادات.</p><h4>الحاسوب</h4><p>ثلاثة مستويات (سهل ومتوسط وصعب). دقة إجاباته تتموّج بين الجولات حسب قوة كل حاسوب، فلا يكون قوياً دائماً.</p>
 <button onclick="closeHelp()">تم</button></div>`;
  document.body.appendChild(d)}
 function closeSet(){const d=document.getElementById("setm");if(d)d.remove()}
 function openSet(){
  closeSet();const d=document.createElement("div");d.id="setm";d.className="mod";d.onclick=e=>{if(e.target==d)closeSet()};
- d.innerHTML=`<div class="mc an"><h3>الإعدادات</h3><p><label><input type="checkbox" id="cs" ${CFG.snd?"checked":""} style="width:auto"> 🔊 الأصوات</label></p><p>تنبيه بداية السؤال:<br><label><input type="checkbox" id="cv" ${CFG.vib?"checked":""} style="width:auto"> 📳 اهتزاز طويل (أندرويد فقط)</label><br><label><input type="checkbox" id="cfl" ${CFG.fl?"checked":""} style="width:auto"> ✨ وميض الشاشة</label><br><label><input type="checkbox" id="ctt" ${CFG.tt?"checked":""} style="width:auto"> 🔤 وميض عنوان التبويب</label><br><label><input type="checkbox" id="cnt" ${CFG.nt?"checked":""} style="width:auto"> 🔔 إشعار المتصفح</label> <button class="s sm" onclick="qAlert()">جرّب</button></p><p>أسماء الأراضي على الخريطة:<br><select id="cl" style="width:auto"><option value="auto">تلقائي حسب التقريب</option><option value="countries">أسماء الدول فقط</option><option value="cities">أسماء المدن فقط</option></select></p><p>حركة الكاميرا التلقائية:<br><select id="ccm" style="width:auto"><option value="0">إيقاف</option><option value="1">خفيفة (تقرّب عند الحاجة)</option><option value="2">كاملة (تتبع كل حركة)</option></select></p><button class="s" onclick="openHelp()">📖 التعليمات</button><button class="s" onclick="reMap()">↻ إعادة تحميل الخريطة</button><button class="s" onclick="if(this.dataset.s)leave();else{this.dataset.s=1;this.textContent='اضغط للتأكيد'}">⎋ خروج</button><br><button onclick="closeSet()">تم</button></div>`;
+ d.innerHTML=`<div class="mc an"><h3>الإعدادات</h3><p><label><input type="checkbox" id="cs" ${CFG.snd?"checked":""} style="width:auto"> 🔊 الأصوات</label></p><p>تنبيه بداية السؤال:<br><label><input type="checkbox" id="cv" ${CFG.vib?"checked":""} style="width:auto"> 📳 اهتزاز طويل (أندرويد فقط)</label><br><label><input type="checkbox" id="cfl" ${CFG.fl?"checked":""} style="width:auto"> ✨ وميض الشاشة</label><br><label><input type="checkbox" id="ctt" ${CFG.tt?"checked":""} style="width:auto"> 🔤 وميض عنوان التبويب</label><br><label><input type="checkbox" id="cnt" ${CFG.nt?"checked":""} style="width:auto"> 🔔 إشعار المتصفح</label> <button class="s sm" onclick="qAlert()">جرّب</button></p><p>أسماء الأراضي على الخريطة:<br><select id="cl" style="width:auto"><option value="auto">تلقائي حسب التقريب</option><option value="countries">أسماء الدول فقط</option><option value="cities">أسماء المدن فقط</option></select></p><p>حركة الكاميرا التلقائية:<br><select id="ccm" style="width:auto"><option value="0">إيقاف</option><option value="1">خفيفة (تقرّب عند الحاجة)</option><option value="2">كاملة (تتبع كل حركة)</option></select></p><p style="color:var(--mut);font-size:12px">الإصدار: ${APPV}<br><button class="s" onclick="copyDiag()">📋 نسخ معلومات التشخيص</button> <span id="dgn"></span></p><button class="s" onclick="openHelp()">📖 التعليمات</button><button class="s" onclick="reMap()">↻ إعادة تحميل الخريطة</button><button class="s" onclick="if(this.dataset.s)leave();else{this.dataset.s=1;this.textContent='اضغط للتأكيد'}">⎋ خروج</button><br><button onclick="closeSet()">تم</button></div>`;
  document.body.appendChild(d);$("cl").value=CFG.lab;$("ccm").value=camMode();$("ccm").onchange=e=>{CFG.cam=+e.target.value;saveCfg()};
  $("cs").onchange=e=>{CFG.snd=e.target.checked;saveCfg();if(CFG.snd)SND.click()};$("cv").onchange=e=>{CFG.vib=e.target.checked;saveCfg();try{if(CFG.vib&&navigator.vibrate)navigator.vibrate(200)}catch(x){}};$("cfl").onchange=e=>{CFG.fl=e.target.checked;saveCfg()};$("ctt").onchange=e=>{CFG.tt=e.target.checked;saveCfg()};$("cnt").onchange=e=>{CFG.nt=e.target.checked;saveCfg();try{if(CFG.nt&&window.Notification&&Notification.permission=="default")Notification.requestPermission()}catch(x){}};$("cl").onchange=e=>{CFG.lab=e.target.value;saveCfg();vb()};
 }
 const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
 const NET={role:"",conns:[],seat:0,ep:0,age:0,t:0};
-const GOALH=`<p>نطاق الخريطة: <select id="msc" onchange="mapUi(1)"><option value="all">كل الدول</option><option value="gulf">الخليج واليمن</option><option value="levant">المشرق والعراق وتركيا</option><option value="nile">مصر والسودان وليبيا وتونس</option><option value="irg">الخليج والعراق وإيران</option><option value="x">أختار الدول بنفسي…</option></select></p><div id="mcu" style="display:none;line-height:2">${CNN.map((n,c)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="mc${c}" onchange="mapUi(1)" style="width:auto"> ${n}</label>`).join("")}</div><p>تفصيل المدن: <select id="mlv" onchange="mapUi(1)"><option value="2">سهل: مدينة لكل دولة</option><option value="1">متوسط: مدينتان</option><option value="0" selected>صعب: كل المدن</option></select> <span id="mcnt" style="color:var(--mut)"></span></p><p>هدف الفوز: <select id="gt" style="width:auto" onchange="goalSync()"><option value="c" selected>احتلال مناطق (مدن)</option><option value="a">زيادة الجيوش</option><option value="k">احتلال العواصم ★</option></select> <select id="gs" style="width:auto" onchange="goalSync(this.value)"><option value="5">5 فوق ما تملك</option><option value="8">8 فوق ما تملك</option><option value="12" selected>12 فوق ما تملك</option><option value="20">20 فوق ما تملك</option><option value="all">كل المناطق</option><option value="x">رقم أختاره…</option></select> <input id="cn" type="number" value="10" min="1" max="500" style="width:60px;display:none"></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>8</option><option>12</option><option selected>20</option><option>30</option><option>50</option><option value="0">لا نهائية</option></select></p>`;
-const GOALOPT={c:[["5","5 مناطق فوق ما تملك"],["8","8 مناطق فوق ما تملك"],["12","12 منطقة فوق ما تملك"],["20","20 منطقة فوق ما تملك"],["all","كل المناطق"],["x","رقم أختاره…"]],a:[["40","زيادة 40 جيشاً"],["80","زيادة 80 جيشاً"],["120","زيادة 120 جيشاً"],["200","زيادة 200 جيش"],["x","رقم أختاره…"]],k:[["all","عواصم جميع اللاعبين"],["1","عاصمة واحدة من الخصوم"],["2","عاصمتان من الخصوم"],["3","3 عواصم من الخصوم"]]};
+const GOALH=`<p>نطاق الخريطة: <select id="msc" onchange="mapUi(1)"><option value="all">كل الدول</option><option value="gulf">الخليج واليمن</option><option value="levant">المشرق والعراق وتركيا</option><option value="nile">مصر والسودان وليبيا وتونس</option><option value="irg">الخليج والعراق وإيران</option><option value="x">أختار الدول بنفسي…</option></select></p><div id="mcu" style="display:none;line-height:2">${CNN.map((n,c)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="mc${c}" onchange="mapUi(1)" style="width:auto"> ${n}</label>`).join("")}</div><p>تفصيل المدن: <select id="mlv" onchange="mapUi(1)"><option value="2">سهل: مدينة لكل دولة</option><option value="1">متوسط: مدينتان</option><option value="0" selected>صعب: كل المدن</option></select> <span id="mcnt" style="color:var(--mut)"></span></p><p>تصنيفات الأسئلة: ${QCN.map((n,i)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="qc${i}" checked onchange="qcUi()" style="width:auto"> ${n}</label>`).join("")} <span id="qcnt" style="color:var(--mut)"></span></p><p>هدف الفوز: <select id="gt" style="width:auto" onchange="goalSync()"><option value="c" selected>احتلال مناطق (مدن)</option><option value="a">زيادة الجيوش</option><option value="k">احتلال العواصم ★</option></select> <select id="gs" style="width:auto" onchange="goalSync(this.value)"><option value="5">5 فوق ما تملك</option><option value="8">8 فوق ما تملك</option><option value="12" selected>12 فوق ما تملك</option><option value="20">20 فوق ما تملك</option><option value="all">كل المناطق</option><option value="x">رقم أختاره…</option></select> <input id="cn" type="number" value="10" min="1" max="500" style="width:60px;display:none"></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>8</option><option>12</option><option selected>20</option><option>30</option><option>50</option><option value="0">لا نهائية</option></select></p>`;
+const GOALOPT={c:[["5","5 مناطق فوق ما تملك"],["8","8 مناطق فوق ما تملك"],["12","12 منطقة فوق ما تملك"],["20","20 منطقة فوق ما تملك"],["all","كل المناطق"],["x","رقم أختاره…"]],a:[["15","+15% من جيوشك عند البداية"],["30","+30% من جيوشك عند البداية"],["50","+50% من جيوشك عند البداية"],["100","+100% (ضعف جيوشك)"],["x","نسبة أختارها…"]],k:[["all","عواصم جميع اللاعبين"],["1","عاصمة واحدة من الخصوم"],["2","عاصمتان من الخصوم"],["3","3 عواصم من الخصوم"]]};
 function goalSync(keep){
  const t=$("gt"),g=$("gs");if(!t||!g)return;
- if(keep===undefined||!GOALOPT[t.value].some(o=>o[0]==keep)){const old=g.value;const same=GOALOPT[t.value].some(o=>o[0]==old)&&g.dataset.t==t.value;keep=same?old:(t.value=="c"?"12":t.value=="a"?"80":"all")}
+ if(keep===undefined||!GOALOPT[t.value].some(o=>o[0]==keep)){const old=g.value;const same=GOALOPT[t.value].some(o=>o[0]==old)&&g.dataset.t==t.value;keep=same?old:(t.value=="c"?"12":t.value=="a"?"30":"all")}
  if(g.dataset.t!=t.value){g.innerHTML=GOALOPT[t.value].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");g.dataset.t=t.value}
  g.value=keep;const n=$("cn");if(n)n.style.display=g.value=="x"?"":"none";
 }
@@ -455,8 +470,8 @@ function readMode(){
  const t=$("gt")?$("gt").value:"c",g=$("gs")?$("gs").value:"12";
  if(t=="k")return g=="all"?"cap":"k"+g;
  if(t=="c"&&g=="all")return "all";
- if(g=="x"){const v=Math.max(1,Math.min(t=="c"?40:500,parseInt($("cn")&&$("cn").value)||10));return t+v}
- return t+g;
+ if(g=="x"){const v=Math.max(1,Math.min(t=="c"?40:300,parseInt($("cn")&&$("cn").value)||10));return(t=="a"?"p":t)+v}
+ return(t=="a"?"p":t)+g;
 }
 const OPTS=`<p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}${GOALH}`;
 function bcast(){
@@ -465,9 +480,11 @@ function bcast(){
  if(S.ph=="q"){o.got=Array.from({length:S.n},(_,p)=>S.gs[p]!==undefined);o.gs=[];if(o.q)o.q=[o.q[0],null,o.q[2]]}
  NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"state",S:o})});
 }
-let migT=0;const hid=(c,e)=>"asr-"+String(c).toUpperCase().trim()+(e?"-"+e:"");
+let migT=0;/* ============ الشبكة والاتصال (PeerJS) ============ */
+const hid=(c,e)=>"asr-"+String(c).toUpperCase().trim()+(e?"-"+e:"");
 function onConn(c){
  c.on("data",d=>{
+  if(d.t=="ping2"){try{c.send({t:"pong",id:d.id})}catch(e){}return}
   if(d.t=="hello"&&c.seat==null){
    let s=-1;
    if(S&&S.multi){if(Number.isInteger(d.seat)&&d.seat>=0&&d.seat<S.n&&d.seat!=NET.seat){s=d.seat;const o=NET.conns[s];if(o&&o!==c&&o.open)try{o.close()}catch(e){}}}
@@ -499,7 +516,8 @@ function onData(d){
  if(NET.role=="host")return;
  NET.age=0;
  if(d.t=="hello"){NET.seat=d.seat;NET.joined=1;try{sessionStorage.setItem("asrseat",d.seat)}catch(e){}if(!S)lobby()}
- else if(d.t=="state"){if(NET.fresh&&(d.S.ep||0)<NET.ep)return;if(NET.fresh&&S&&(d.S.ep||0)==(S.ep||0)&&(d.S.sq||0)<(S.sq||0))return;S=d.S;NET.ep=S.ep||0;NET.fresh=true;NET.wait=0;NET.st=NET.t;NET.sd=Date.now();NET.mig=false;migT=0;render()}
+ else if(d.t=="state"){if(NET.fresh&&(d.S.ep||0)<NET.ep)return;if(NET.fresh&&S&&(d.S.ep||0)==(S.ep||0)&&(d.S.sq||0)<(S.sq||0))return;if(NET.wait)nlog("وصلت حالة اللعبة");S=d.S;NET.ep=S.ep||0;NET.fresh=true;NET.wait=0;NET.st=NET.t;NET.sd=Date.now();NET.mig=false;migT=0;render()}
+ else if(d.t=="pong"){NET.pgr=d.id}
  else if(d.t=="ping"){if(NET.fresh&&!NET.wait&&S&&d.k!=null&&(d.k!==S.key||d.sq!==S.sq)&&NET.t-(NET.ls||-9)>=3){NET.ls=NET.t;try{NET.c&&NET.c.open&&NET.c.send({t:"sync"})}catch(e){}}}
  else if(d.t=="full"){NET.err="الغرفة ممتلئة أو بدأت";if(!S)lobby()}
  else if(d.t=="newhost"){if(d.seat==NET.seat)becomeHost(d.ep);else{NET.ep=d.ep-1;reconnect(false,d.ep)}}
@@ -508,7 +526,7 @@ function join(code,ep){
  if(ep===undefined)NET.tr=0;
  if(typeof Peer=="undefined"){alert("تعذر تحميل مكتبة الاتصال. تأكد من الإنترنت ثم حدّث الصفحة.");return}
  if(NET.peer)try{NET.peer.destroy()}catch(e){}
- NET.role="client";NET.code=code;NET.ep=ep||0;NET.err="";NET.joined=0;NET.mig=false;migT=0;NET.wait=1;
+ NET.role="client";NET.code=code;NET.ep=ep||0;NET.err="";NET.joined=0;NET.mig=false;migT=0;NET.wait=1;NET.wt=NET.t;nlog("انضمام للغرفة "+code);
  const retry=()=>{if(S&&S.multi)lost();else if(!NET.joined){NET.tr=(NET.tr||0)+1;if(NET.tr>26){NET.err="الغرفة غير موجودة أو انتهت. تأكد من الكود.";if(NET.peer)try{NET.peer.destroy()}catch(e){}lobby();return}NET.ep=(NET.ep||0)+1;if(NET.ep>EPW)NET.ep=0;setTimeout(()=>{if(NET.role=="client"&&!(NET.c&&NET.c.open))join(NET.code,NET.ep)},NET.tr%13==0?2000:500)}else setTimeout(()=>{if(NET.role=="client"&&!(NET.c&&NET.c.open))join(NET.code,NET.ep)},2500)};
  const pr=NET.peer=new Peer();
  pr.on("disconnected",()=>{try{if(NET.peer===pr&&!pr.destroyed)pr.reconnect()}catch(e){}});
@@ -521,10 +539,29 @@ function join(code,ep){
  pr.on("error",e=>{if(NET.peer!==pr)return;NET.err=e.type;if(!S)lobby();retry()});
  if(!S)lobby();
 }
-function lost(){
+function lost(why){
  if(!S||!S.multi||S.ph=="end"||NET.role!="client"||migT)return;
+ nlog("انقطاع: "+(why||"إغلاق الاتصال"));
  const hum=[...Array(S.n).keys()].filter(p=>p!=S.hs&&alive(p)&&!(S.bots&&S.bots[p])).sort((a,b)=>a-b),rank=Math.max(0,hum.indexOf(NET.seat));
  reconnect(!!NET.fresh||!!NET.saved,NET.ep,(NET.fresh?10:22)+rank*3);
+}
+NET.log=[];
+function nlog(m){try{NET.log.push([Date.now(),m]);if(NET.log.length>14)NET.log.shift()}catch(e){}}
+const logTxt=()=>NET.log.slice(-7).map(x=>new Date(x[0]).toISOString().slice(14,19)+" "+x[1]).join("<br>");
+const APPV="2.0 · 2026-10-25";
+function diagText(){
+ const L=[];const a=(k,v)=>L.push(k+": "+v);
+ a("الإصدار",APPV);a("الوقت",new Date().toISOString());
+ try{a("الدور",NET.role||"محلي");a("الغرفة",NET.code||"-");a("المقعد",NET.seat);a("الموضع",NET.ep);a("متصل/يبحث/ينتظر",(NET.c&&NET.c.open?"1":"0")+"/"+(NET.mig?"1":"0")+"/"+(NET.wait?"1":"0"));
+  a("الخريطة",S&&S.map?JSON.stringify(S.map)+" مناطق="+N:"-");a("اللعبة",S?"جولة "+S.r+" مرحلة "+S.ph+" لاعبون "+S.n+" هدف "+S.mode:"-");
+  a("الشبكة",navigator.onLine?"متصل":"بلا إنترنت");a("المتصفح",(navigator.userAgent||"").slice(0,110))}catch(e){a("خطأ",e.message)}
+ L.push("--- سجل الاتصال ---");NET.log.forEach(x=>L.push(new Date(x[0]).toISOString().slice(11,19)+" "+x[1]));
+ return L.join("\n");
+}
+function copyDiag(){
+ const t=diagText(),n=()=>{const e=$("dgn");if(e)e.textContent="تم النسخ — الصقه في رسالة"};
+ const fb=()=>{try{const x=document.createElement("textarea");x.value=t;document.body.appendChild(x);x.select();document.execCommand("copy");x.remove();n()}catch(e){const q=$("dgn");if(q)q.textContent="تعذر النسخ"}};
+ try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(n,fb);else fb()}catch(e){fb()}
 }
 const EPW=12;
 const stale=()=>Math.max(NET.t-(NET.st||0),(Date.now()-(NET.sd||0))/1000);
@@ -534,12 +571,13 @@ function nextProbe(){
 }
 function reconnect(canHost,lo,grace){
  {const old=NET.peer;NET.peer=null;NET.c=null;migT=1;if(old)try{old.destroy()}catch(e){}}
+ nlog("بحث عن المضيف من الموضع "+lo);NET.rp=NET.t;
  NET.lo=lo;NET.sc=lo;NET.canHost=canHost;NET.allUn=true;NET.mig=true;migT=1;NET.mt0=canHost?NET.t+(grace||0):NET.t+1e9;
  const pr=NET.peer=new Peer();
- pr.on("open",()=>{if(NET.peer===pr)probe()});
- pr.on("disconnected",()=>{try{if(NET.peer===pr&&!pr.destroyed)pr.reconnect()}catch(e){}});
+ pr.on("open",()=>{if(NET.peer===pr){nlog("اتصل بالخادم الوسيط");NET.rp=NET.t;probe()}});
+ pr.on("disconnected",()=>{nlog("انقطع الخادم الوسيط");try{if(NET.peer===pr&&!pr.destroyed)pr.reconnect()}catch(e){}});
  pr.on("error",e=>{
-  if(NET.peer!==pr||!NET.mig)return;const un=e.type=="peer-unavailable";if(!un)NET.allUn=false;
+  nlog("خطأ: "+e.type);if(NET.peer!==pr||!NET.mig)return;const un=e.type=="peer-unavailable";if(!un)NET.allUn=false;
   setTimeout(()=>{if(NET.peer!==pr||!NET.mig)return;
    if(!un){reconnect(NET.canHost,NET.lo,Math.max(0,NET.mt0-NET.t));return}
    nextProbe()},un?400:2500);
@@ -548,8 +586,8 @@ function reconnect(canHost,lo,grace){
 }
 function probe(){
  const pr=NET.peer;if(!pr||!NET.mig)return;
- const ep=NET.sc,c=NET.c=pr.connect(hid(NET.code,ep),{reliable:true});
- c.on("open",()=>{if(NET.peer!==pr||NET.c!==c)return;NET.ep=ep;NET.mig=false;migT=0;NET.age=0;NET.wait=1;c.send({t:"hello",seat:NET.seat,name:MYN})});
+ const ep=NET.sc,c=NET.c=pr.connect(hid(NET.code,ep),{reliable:true});NET.rp=NET.t;
+ c.on("open",()=>{if(NET.peer!==pr||NET.c!==c)return;nlog("اتصل بالمضيف (موضع "+ep+")");NET.ep=ep;NET.mig=false;migT=0;NET.age=0;NET.wait=1;NET.wt=NET.t;c.send({t:"hello",seat:NET.seat,name:MYN})});
  c.on("data",onData);c.on("close",()=>{if(NET.c===c){migT=0;lost()}});
  setTimeout(()=>{if(NET.peer===pr&&NET.mig&&NET.c===c&&!c.open){NET.c=null;try{c.close()}catch(e){}NET.allUn=false;nextProbe()}},8000);
 }
@@ -602,6 +640,7 @@ function takeOver(p){
 }
 function dcWatch(){
  if(NET.role!="host"||!S||!S.multi||S.ph=="end"||!S.hum)return;
+ try{const pr=NET.peer;if(pr&&pr.disconnected&&!pr.destroyed){nlog("المضيف: إعادة تسجيل الغرفة");pr.reconnect()}}catch(e){}
  NET.dc=NET.dc||{};const off=[];
  for(let p=0;p<S.n;p++){
   const c=NET.conns[p],isOff=!!S.hum[p]&&p!=NET.seat&&!(c&&c.open)&&NET.t-(NET.hs0||0)>8;
@@ -615,7 +654,8 @@ function dcWatch(){
  if(JSON.stringify(off)!=JSON.stringify(S.off||[])){S.off=off;render()}
 }
 let hb=0;
-setInterval(()=>{NET.t++;if(NET.role=="host"){if(++hb%3==0)NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"ping",k:S&&S.key,sq:S&&S.sq})})}else if(NET.role=="client"&&S&&S.multi&&S.ph!="end"&&!NET.mig&&++NET.age>12)lost();if(NET.role=="host"&&hb%15==0)chkNewer();if(NET.role=="host")try{dcWatch()}catch(e){}},1000);
+setInterval(()=>{NET.t++;if(NET.role=="host"){if(++hb%3==0)NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"ping",k:S&&S.key,sq:S&&S.sq})})}else if(NET.role=="client"&&S&&S.multi&&S.ph!="end"&&!NET.mig&&++NET.age>12)lost();if(NET.role=="host"&&hb%15==0)chkNewer();if(NET.role=="host")try{dcWatch()}catch(e){}
+ if(NET.role=="client"&&S&&S.multi&&S.ph!="end"){if(NET.mig&&NET.t-(NET.rp||0)>15){migT=0;lost("لا تقدم منذ 15 ثانية")}else if(!NET.mig&&NET.wait&&NET.t-(NET.wt||0)>12){migT=0;lost("انتظار الحالة طويل")}}},1000);
 const inviteUrl=()=>{try{if(/^https?:$/.test(location.protocol)){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("room",NET.code);return u.toString()}}catch(e){}return""};
 function inviteNote(m){const e=$("invn");if(e){e.textContent=m;setTimeout(()=>{const x=$("invn");if(x&&x.textContent==m)x.textContent=""},5000)}}
 function copyText(t,code){
@@ -696,10 +736,12 @@ function apply(seat,t,a){
  else if(t=="endTurn"&&ph=="fortify")endTurn();
 }
 const capM=()=>S.mode=="cap"||S.mode[0]=="k";
+const SHIELD=3;
+const shielded=i=>!!(S.cap&&capM()&&S.r<=SHIELD&&S.cap[S.T[i]]===i);
 function start(n,o){
  const mc=o?o.map:($("msc")?readMap():(S&&S.map)||{});if(!mapOk(mc,n))return;
  fitView();camReset();NET.hs0=NET.t;
- QS=shuf(Q);S={map:mc,n,ans:o?o.ans:($("am")?$("am").value:"num"),bots:o?o.bots.slice():Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:o?o.diff:($("bd")?+$("bd").value:1),lim:o?o.lim:readLim(),multi:NET.role=="host",mode:o?o.mode:readMode(),max:o?o.max:($("mr")?+$("mr").value:12),tm:o?o.tm:($("tmc")?$("tmc").checked:true),t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:o&&o.hs!=null?o.hs:0,ep:o&&o.ep!=null?o.ep:0,sq:o&&o.sq||0,act:[],idle:[],away:[]};
+ QS=qpool(o?o.cats:readCats());S={map:mc,cats:o?o.cats:readCats(),st:Array.from({length:n},()=>({g:0,acc:0,bc:0,bq:"",bg:0,ba:0,w:0,cap:0,aw:0,ae:0,pk:0})),n,ans:o?o.ans:($("am")?$("am").value:"num"),bots:o?o.bots.slice():Array.from({length:n},(_,p)=>p>=n-Math.min(n-1,$("bn")?+$("bn").value:0)),diff:o?o.diff:($("bd")?+$("bd").value:1),lim:o?o.lim:readLim(),multi:NET.role=="host",mode:o?o.mode:readMode(),max:o?o.max:($("mr")?+$("mr").value:12),tm:o?o.tm:($("tmc")?$("tmc").checked:true),t:0,key:"",r:0,P:[],T:[],A:Array(N).fill(3),gs:[],gi:0,cur:0,ph:"",champ:[],sel:null,tgt:null,msg:"",hs:o&&o.hs!=null?o.hs:0,ep:o&&o.ep!=null?o.ep:0,sq:o&&o.sq||0,act:[],idle:[],away:[]};
  for(let i=0;i<n;i++)S.P.push({res:0});
  let rest=[...Array(N).keys()];
  if(capM()){
@@ -719,8 +761,9 @@ S.names=o&&o.names?o.names.slice():(()=>{const l=$("lnm")?$("lnm").value.split(/
 nextRound();
 }
 function nextRound(){
+ if(S.st)S.st.forEach((t,p)=>{if(t)t.pk=Math.max(t.pk,cnt(p))});
  S.sel=S.tgt=null;S.r++;if(S.max&&S.r>S.max)return finish();
- if(!QS.length)QS=shuf(Q);S.q=QS[(S.r-1)%QS.length];S.qr=S.ans=="bar"?rangeFor(S.q):null;S.gs=[];S.gi=0;S.ph="q";S.msg="";
+ if(!QS.length)QS=qpool(S.cats);S.q=QS[(S.r-1)%QS.length];SEEN.add(S.q[0]);seenSave();S.qr=S.ans=="bar"?rangeFor(S.q):null;S.gs=[];S.gi=0;S.ph="q";S.msg="";
  if(S.multi){S.bots.forEach((b,p)=>{if(b&&alive(p))S.gs[p]=botGuess(p)});while(!alive(S.gi))S.gi++}else skipBots();
  if(!S.multi&&S.gi>=S.n)return results();render();
 }
@@ -735,10 +778,12 @@ function guess(v,seat,to){
  S.gs[S.gi]=to?NaN:v;S.msg="";S.gi++;skipBots();
  S.gi>=S.n?results():render();
 }
+/* ============ قواعد اللعب: الأسئلة والتوزيع والهجوم ============ */
 function results(){
  const a=S.q[1],ps=[...Array(S.n).keys()].filter(alive).map(p=>({p,d:isNaN(S.gs[p])?Infinity:Math.abs(S.gs[p]-a)})).sort((x,y)=>x.d-y.d);
  S.cl=[];ps.forEach(x=>{x.c=x.d==Infinity?0:Math.max(0,1-x.d/(S.q[2]||Math.abs(a)));S.cl[x.p]=x.c;x.pts=Math.floor(x.c*10+1e-9);S.P[x.p].res+=x.pts});
- const mx=Math.max(...ps.map(x=>x.pts));S.champ=mx>0?ps.filter(x=>x.pts==mx).map(x=>x.p):[];
+ if(S.st)ps.forEach(x=>{const t=S.st[x.p];if(!t)return;t.g++;t.acc+=x.c;if(x.c>t.bc){t.bc=x.c;t.bq=S.q[0];t.bg=S.gs[x.p];t.ba=a}});
+ const mx=Math.max(...ps.map(x=>x.pts));S.champ=mx>0?ps.filter(x=>x.pts==mx).map(x=>x.p):[];if(S.st)S.champ.forEach(p=>{if(S.st[p])S.st[p].w++});
  S.rt=ps;S.ph="qr";render();
 }
 function begin(){S.pl=[];let f=(S.r-1)%S.n;while(!alive(f))f=(f+1)%S.n;S.cur=f;startTurn()}
@@ -750,7 +795,7 @@ function clk(i){
  else if(S.ph=="fortify")fclk(i);
  else if(S.ph=="attack"){
   if(S.T[i]==S.cur){S.sel=(i==S.sel||S.A[i]<2)?null:i;S.tgt=null}
-  else if(S.sel!=null&&ADJ[S.sel][i])S.tgt=i==S.tgt?null:i;
+  else if(S.sel!=null&&ADJ[S.sel][i]){if(i!=S.tgt&&shielded(i)){S.msg="🛡 العاصمة محمية حتى نهاية الجولة "+SHIELD;render();return}S.tgt=i==S.tgt?null:i}
   render();
  }
 }
@@ -788,6 +833,7 @@ const lv=c=>S.lv&&S.lv[c]!=null?S.lv[c]:(S.diff||0);
 function botGuess(p){const a=S.q[1],sc=S.q[2]||Math.abs(a),pw=S.pw&&S.pw[p]!=null?S.pw[p]:[.42,.6,.78][lv(p)],w=Math.cos(2*Math.PI*((S.r-1)/7+p*.13))*.22,c=Math.max(.05,Math.min(.99,pw+w+(Math.random()-.5)*.1));return Math.abs(Math.round(a+(Math.random()<.5?-1:1)*(1-c)*sc))}
 function skipBots(){while(S.gi<S.n&&(!alive(S.gi)||S.bots[S.gi])){if(alive(S.gi))S.gs[S.gi]=botGuess(S.gi);S.gi++}}
 const wins=(n,da,att,def)=>n>da||(n==da&&((S.cl||[])[att]||0)>((S.cl||[])[def]||0));
+/* ============ لاعب الحاسوب ============ */
 function botVal(c,j){let v=1+1.5/(S.A[j]+1)+.01*cnt(S.T[j]);if(capM()){if(S.cap.includes(j))v+=4;if(nbr(j).includes(S.cap[c]))v+=.8}return v}
 function botNeed(c,j){const da=S.A[j];return Math.max(1,wins(da,da,c,S.T[j])?da:da+1)}
 function botDeploy(c,own){
@@ -801,7 +847,7 @@ function botDeploy(c,own){
 function botAttack(c,own){
  if((S.bn||0)>=[3,8,14][lv(c)]||(lv(c)==0&&Math.random()<.4))return null;
  let best=null,bs=-1e9;
- own.forEach(i=>{if(S.A[i]<2)return;nbr(i).forEach(j=>{if(S.T[j]==c)return;const n=botNeed(c,j);if(n>S.A[i]-1)return;const v=botVal(c,j)+.05*(S.A[i]-n)+(lv(c)==0?Math.random():0);if(v>bs){bs=v;best=[i,j,n]}})});
+ own.forEach(i=>{if(S.A[i]<2)return;nbr(i).forEach(j=>{if(S.T[j]==c||shielded(j))return;const n=botNeed(c,j);if(n>S.A[i]-1)return;const v=botVal(c,j)+.05*(S.A[i]-n)+(lv(c)==0?Math.random():0);if(v>bs){bs=v;best=[i,j,n]}})});
  return best}
 function botFort(c,own){
  if(!lv(c))return null;
@@ -832,6 +878,7 @@ function showErr(){
  const h=NET.role=="host"&&S&&S.multi&&S.ph!="end";
  if(errN>=3&&h&&!NET.xe){NET.xe=1;setTimeout(()=>{NET.xe=0},60000);try{hostXfer(false)}catch(e){}}
  if(document.getElementById("errb"))return;const d=document.createElement("div");d.id="errb";d.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:20;background:#7a1f1f;color:#fff;padding:8px 12px;border-radius:12px;text-align:center";d.innerHTML='حدث خطأ غير متوقع. '+(h?'<button style="background:#fff;color:#7a1f1f" onclick="hostXfer(0);this.parentNode.remove()">👑 نقل الاستضافة</button> ':'')+'<button onclick="leave()" style="background:#fff;color:#7a1f1f">إعادة اللعبة</button> <button class="s" style="color:#fff;border-color:#fff" onclick="this.parentNode.remove()">تجاهل</button>';document.body.appendChild(d)}
+/* ============ الحفظ والاستعادة ============ */
 function restore(){
  window.addEventListener("error",showErr);
  try{
@@ -852,14 +899,14 @@ function cfHTML(){const a=S.sel,d=S.tgt,m=S.A[a]-1,at=S.ph=="attack",k=S.ph+a+">
 const cfOk=()=>act(S.ph=="attack"?"atk":"mv"),cfNo=()=>act("undo");
 function atk(n){
  const a=S.sel,d=S.tgt,da=S.A[d];
-  if(wins(n,da,S.cur,S.T[d])){S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${dn(S.cur)} على ${R[d].n}.`}
- else{{const k=Math.ceil(n/2);S.A[a]-=k;S.A[d]=Math.max(1,da-k);S.msg=`فشل الهجوم على ${R[d].n}: خسر الطرفان ${k} جيش.`}}
+  if(wins(n,da,S.cur,S.T[d])){if(S.st&&S.st[S.cur]){S.st[S.cur].cap++;S.st[S.cur].aw++}S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${dn(S.cur)} على ${R[d].n}.`}
+ else{{if(S.st&&S.st[S.cur])S.st[S.cur].ae++;const k=Math.ceil(n/2);S.A[a]-=k;S.A[d]=Math.max(1,da-k);S.msg=`فشل الهجوم على ${R[d].n}: خسر الطرفان ${k} جيش.`}}
  S.ev={id:(S.ev?S.ev.id:0)+1,t:S.msg,c:S.cur};S.sel=S.tgt=null;if(!win())render();
  if(S.multi&&NET.role=="host"&&S.ph!="end"&&!alive(S.hs))setTimeout(hostXfer,400);
 }
 const armies=p=>S.A.reduce((s,a,i)=>s+(S.T[i]==p?a:0),0);
-function goal(){const m=S.mode,n=m.slice(1);return m=="all"?"احتلال جميع المناطق الـ"+N:m=="cap"?"احتلال عواصم جميع اللاعبين ★":m[0]=="k"?(n==1?"احتلال عاصمة واحدة":n==2?"احتلال عاصمتين":"احتلال "+n+" عواصم")+" من عواصم الخصوم ★":m[0]=="c"?"احتلال "+n+" مناطق جديدة فوق ما تملكه عند البداية":"زيادة جيوشك "+n+" فوق ما بدأت به"}
-function won(p){const m=S.mode,n=+m.slice(1);return m=="all"?cnt(p)==N:m=="cap"?S.cap.every(c=>S.T[c]==p):m[0]=="k"?S.cap.filter((c,q)=>q!=p&&S.T[c]==p).length>=n:m[0]=="c"?cnt(p)>=S.i0[p]+n:armies(p)>=S.ia[p]+n}
+function goal(){const m=S.mode,n=m.slice(1);return m=="all"?"احتلال جميع المناطق الـ"+N:m=="cap"?"احتلال عواصم جميع اللاعبين ★":m[0]=="k"?(n==1?"احتلال عاصمة واحدة":n==2?"احتلال عاصمتين":"احتلال "+n+" عواصم")+" من عواصم الخصوم ★":m[0]=="c"?"احتلال "+n+" مناطق جديدة فوق ما تملكه عند البداية":m[0]=="p"?"رفع جيوشك "+n+"% فوق ما بدأت به":"زيادة جيوشك "+n+" فوق ما بدأت به"}
+function won(p){const m=S.mode,n=+m.slice(1);return m=="all"?cnt(p)==N:m=="cap"?S.cap.every(c=>S.T[c]==p):m[0]=="k"?S.cap.filter((c,q)=>q!=p&&S.T[c]==p).length>=n:m[0]=="c"?cnt(p)>=S.i0[p]+n:m[0]=="p"?armies(p)>=Math.ceil(S.ia[p]*(1+n/100)):armies(p)>=S.ia[p]+n}
 function win(){
  if(S.hum&&![...Array(S.n).keys()].some(p=>alive(p)&&S.hum[p])){finish();return true}
  for(let p=0;p<S.n;p++)if(alive(p)&&won(p)){finish(p);return true}
@@ -874,15 +921,30 @@ function endTurn(){
 }
 function rematch(){
  if(!S||S.ph!="end"||NET.role=="client")return;
- const n=S.n,o={map:S.map,ans:S.ans,bots:S.hum.map(h=>!h),diff:S.diff,lim:JSON.parse(JSON.stringify(S.lim)),mode:S.mode,max:S.max,tm:S.tm,names:(S.names||[]).slice(),hs:NET.role=="host"?NET.seat:0,ep:S.ep||0,sq:S.sq||0},away=[];
+ const n=S.n,o={map:S.map,ans:S.ans,bots:S.hum.map(h=>!h),diff:S.diff,lim:JSON.parse(JSON.stringify(S.lim)),mode:S.mode,max:S.max,tm:S.tm,cats:S.cats,names:(S.names||[]).slice(),hs:NET.role=="host"?NET.seat:0,ep:S.ep||0,sq:S.sq||0},away=[];
  if(NET.role=="host")o.bots=o.bots.map((b,p)=>{if(b||p==NET.seat)return b;if(NET.conns[p]&&NET.conns[p].open)return false;away.push(p);return true});
  start(n,o);
  if(S&&S.n==n&&away.length){away.forEach(p=>{S.away[p]=true;S.hum[p]=true});render()}
+}
+function endStats(){
+ const sc=p=>cnt(p)*1000+armies(p),ids=[...Array(S.n).keys()].sort((a,b)=>(a==S.w?-1:b==S.w?1:0)||sc(b)-sc(a));
+ let h=`<h2>🏆 الفائز: ${dn(S.w)}</h2><p>يحكم ${cnt(S.w)} من ${N} منطقة بعد ${S.max&&S.r>S.max?S.max:S.r} جولة.</p>`;
+ const st=S.st;if(!st)return h;
+ const acc=p=>st[p]&&st[p].g?st[p].acc/st[p].g:0,best=f=>{let b=-1,v=0;ids.forEach(p=>{if(st[p]&&f(p)>v){v=f(p);b=p}});return b};
+ const a1=best(acc),a2=best(p=>st[p].cap),a3=best(p=>st[p].bc),a4=best(p=>st[p].w),aw=[];
+ if(a1>=0)aw.push(`🎯 الأدق تخميناً: <b>${dn(a1)}</b> (متوسط ${Math.round(acc(a1)*100)}%)`);
+ if(a3>=0)aw.push(`🧠 أفضل تخمين: <b>${dn(a3)}</b> بدقة ${Math.round(st[a3].bc*100)}% — «${st[a3].bq}» (الجواب ${st[a3].ba}، خمّن ${st[a3].bg})`);
+ if(a4>=0)aw.push(`📚 أكثر فوزاً بالأسئلة: <b>${dn(a4)}</b> (${st[a4].w})`);
+ if(a2>=0)aw.push(`⚔ الأكثر احتلالاً: <b>${dn(a2)}</b> (${st[a2].cap} احتلالاً)`);
+ if(aw.length)h+=`<div style="font-size:13px;line-height:1.8">${aw.join("<br>")}</div>`;
+ h+=`<div style="overflow-x:auto"><table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:8px"><tr style="color:var(--mut)"><td>اللاعب</td><td>أراضي</td><td>جيوش</td><td>دقة</td><td>هجمات</td></tr>`+ids.map(p=>`<tr><td><span class="dot" style="background:${PC[p]};border:1px solid #fff"></span> ${nm(p)}</td><td>${cnt(p)}</td><td>${armies(p)}</td><td>${Math.round(acc(p)*100)}%</td><td>${st[p]?st[p].aw+"/"+(st[p].aw+st[p].ae):"-"}</td></tr>`).join("")+`</table></div>`;
+ return h;
 }
 function finish(w){
  if(w==null){const sc=p=>cnt(p)*1000+S.A.reduce((s,a,i)=>s+(S.T[i]==p?a:0),0);w=[...Array(S.n).keys()].sort((a,b)=>sc(b)-sc(a))[0]}
  S.w=w;S.ph="end";render();
 }
+/* ============ الرسم والواجهة ============ */
 function mapSvg(){
  let s=`<svg viewBox="${Z.x} ${Z.y} ${Z.w} ${Z.h}" preserveAspectRatio="xMidYMid meet" direction="ltr" style="--c:${lod().c};--k:${lod().k};--s:${lod().s}">`;
  let tx="";
@@ -907,11 +969,10 @@ function mapSvg(){
  }
  return s+'</svg>';
 }
-const syncHTML=()=>`<div class="mod" style="z-index:12"><div class="mc an"><div class="card"><h3>⏳ جارٍ الرجوع إلى اللعبة</h3><p>${NET.mig?"انقطع الاتصال — نبحث عن المضيف لنعود معك إلى نفس اللعبة والدور.":"تم الاتصال، جارٍ مزامنة اللعبة مع المضيف..."}</p><p style="color:var(--mut);font-size:12px">ما خلف هذه النافذة قد يكون قديماً، ولن تستطيع اللعب حتى تكتمل المزامنة.</p><button class="s" onclick="syncNow()">🔄 إعادة المحاولة</button><button class="s" onclick="if(confirm('الخروج من اللعبة؟'))leave()">⎋ خروج</button></div></div></div>`;
+const syncHTML=()=>`<div class="mod" style="z-index:12"><div class="mc an"><div class="card"><h3>⏳ جارٍ الرجوع إلى اللعبة</h3><p>${NET.mig?"انقطع الاتصال — نبحث عن المضيف لنعود معك إلى نفس اللعبة والدور.":"تم الاتصال، جارٍ مزامنة اللعبة مع المضيف..."}</p><p style="color:var(--mut);font-size:12px">ما خلف هذه النافذة قد يكون قديماً، ولن تستطيع اللعب حتى تكتمل المزامنة.</p><p style="color:var(--mut);font-size:11px;direction:ltr;text-align:left;line-height:1.5">${logTxt()}<br>v${APPV}</p><button class="s" onclick="syncNow()">🔄 إعادة الاتصال</button><button class="s" onclick="if(confirm('الخروج من اللعبة؟'))leave()">⎋ خروج</button></div></div></div>`;
 function syncNow(){
  if(NET.role!="client"||!S||!S.multi||S.ph=="end")return;
- if(NET.c&&NET.c.open&&!NET.mig){try{NET.c.send({t:"sync"})}catch(e){}return}
- migT=0;lost();
+ nlog("إعادة اتصال يدوية");migT=0;lost("يدوي");
 }
 function closeXfer(){const d=document.getElementById("xferm");if(d)d.remove()}
 function xferOpen(){
@@ -924,18 +985,24 @@ function xferOpen(){
 function wake(){
  if(!S||!S.multi||S.ph=="end")return;
  try{const pr=NET.peer;if(pr&&pr.disconnected&&!pr.destroyed)pr.reconnect()}catch(e){}
- if(NET.role=="client"){if(!NET.mig&&!(NET.c&&NET.c.open))lost();else if(NET.c&&NET.c.open&&NET.fresh&&!NET.wait){try{NET.c.send({t:"sync"})}catch(e){}}}
+ if(NET.role=="client"){
+  if(!NET.mig&&!(NET.c&&NET.c.open))lost("لا اتصال عند العودة");
+  else if(!NET.mig&&NET.c&&NET.c.open){
+   const id=Date.now()+Math.random();NET.pg=id;nlog("فحص الاتصال بعد العودة");
+   try{NET.c.send({t:"ping2",id});if(NET.fresh&&!NET.wait)NET.c.send({t:"sync"})}catch(e){migT=0;lost("فشل الإرسال");return}
+   setTimeout(()=>{if(NET.pg===id&&NET.pgr!==id&&NET.role=="client"&&!NET.mig){migT=0;lost("لا رد من المضيف")}},3000);
+  }}
  else if(NET.role=="host")bcast();
 }
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake()});window.addEventListener("online",wake);window.addEventListener("pageshow",wake);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)wake()});window.addEventListener("online",wake);window.addEventListener("pageshow",wake);window.addEventListener("focus",wake);
 function render(){if(S&&S.map)buildMap(S.map);const e=$("gv"),v=e?e.value:"",f0=e&&document.activeElement==e;render0();const g=$("gv");if(g&&v){g.value=v;if(f0)g.focus();if(g.type=="range")bsh()}bcast();scheduleBot();save()}
 function render0(){
  const app=$("app");DOCK="";
  if(!S&&NET.role)return lobby();
  if(!S){app.innerHTML=`<div class="side"><div class="card"><h2>صراع الأرض</h2><p>جيوشك تأتيك من معرفتك.</p><p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}${GOALH}${NAMEH()}<p>أسماء لاعبي اللعب المحلي (اختياري، افصل بفاصلة): <input id="lnm" style="width:100%"></p><p>عدد اللاعبين الكلي: <select id="pn" style="width:auto">${[2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select></p><button onclick="start(+$('pn').value)">ابدأ اللعب</button><hr><p>أو العب أونلاين على عدة أجهزة:</p><button class="s" onclick="host()">إنشاء غرفة</button> <input id="rc" placeholder="كود الغرفة" style="width:100px"> <button class="s" onclick="join($('rc').value)">انضمام</button></div></div><div class="mapw">${(S={T:R.map((_,i)=>i%4),A:R.map(()=>"")},mapSvg())}</div>`;S=null;return}
- if(S.ph=="end"){if(lastEnd!=S.r+"w"){lastEnd=S.r+"w";SND.win()}app.innerHTML=`<div class="side"><div class="card"><h2>الفائز: ${dn(S.w)}</h2><p>يحكم ${cnt(S.w)} من ${N} منطقة.</p>${NET.role=="client"?`<p style="color:var(--mut)">بانتظار المضيف لبدء جولة جديدة…</p><button class="s" onclick="leave()">خروج</button>`:`<button onclick="rematch()">🔁 جولة جديدة بنفس اللاعبين</button><button class="s" onclick="leave()">لعبة جديدة بإعدادات أخرى</button>`}</div></div>${mapw()}`;return}
+ if(S.ph=="end"){if(lastEnd!=S.r+"w"){lastEnd=S.r+"w";SND.win()}app.innerHTML=`<div class="side"><div class="card">${endStats()}${NET.role=="client"?`<p style="color:var(--mut)">بانتظار المضيف لبدء جولة جديدة…</p><button class="s" onclick="leave()">خروج</button>`:`<button onclick="rematch()">🔁 جولة جديدة بنفس اللاعبين</button><button class="s" onclick="leave()">لعبة جديدة بإعدادات أخرى</button>`}</div></div>${mapw()}`;return}
  const key=S.ph+S.cur+S.gi+S.r;if(S.key!=key){S.key=key;S.t=L()[S.ph]||0;askSkip=false}
- const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="k"?" · عواصم محتلة "+S.cap.filter((c,q)=>q!=i&&S.T[c]==i).length:S.mode=="cap"||S.mode=="all"?"":S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
+ const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="k"?" · عواصم محتلة "+S.cap.filter((c,q)=>q!=i&&S.T[c]==i).length:S.mode=="cap"||S.mode=="all"?"":S.mode[0]=="p"?" · زيادة "+Math.round(100*(armies(i)/Math.max(1,S.ia[i])-1))+"%":S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
  if(S.multi&&NET.role&&S.bots&&S.bots[NET.seat]&&S.away&&S.away[NET.seat])h=`<div class="card"><p>🤖 الحاسوب يلعب نيابةً عنك لأنك غبت دورين.</p><button onclick="act('resume')">▶ إكمال اللعبة</button></div>`+h;
  if(NET.role=="client"&&S.multi&&(NET.mig||!NET.fresh))h=`<div class="card"><p>⏳ ${NET.mig?"انقطع الاتصال بالمضيف — جارٍ العودة إلى اللعبة...":"جارٍ استعادة اللعبة من المضيف..."}</p></div>`+h;
  const h0=h;
