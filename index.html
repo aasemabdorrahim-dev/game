@@ -139,23 +139,29 @@ const RB=[
 let R=RB,N=RB.length,ADJ=[],CN=[],LP=[],SEA=[];const WIN=9,PN=["الأحمر","الأزرق","الأخضر","الذهبي","البنفسجي","البرتقالي","البني","الرمادي"],PC=["#c0392b","#2471a3","#1e8449","#b7950b","#7d3c98","#d35400","#8b5a2b","#9aa5ab"],DOT=["🔴","🔵","🟢","🟡","🟣","🟠","🟤","⚪"];
 const px=p=>[(p[0]-34)*34+20,(34-p[1])*34+10];
 function pca(P){const n=P.length,mx=P.reduce((q,p)=>q+p[0],0)/n,my=P.reduce((q,p)=>q+p[1],0)/n;let sxx=0,syy=0,sxy=0;P.forEach(p=>{sxx+=(p[0]-mx)**2;syy+=(p[1]-my)**2;sxy+=(p[0]-mx)*(p[1]-my)});const t=Math.hypot(sxx-syy,2*sxy),el=Math.sqrt((sxx+syy+t)/Math.max(1e-6,sxx+syy-t));let th=.5*Math.atan2(2*sxy,sxx-syy),deg=th*180/Math.PI;deg=el<1.3?0:Math.max(-40,Math.min(40,deg));th=deg*Math.PI/180;return{th,deg}}
+const INRC=new Map();
 function inr(i){
- const r=R[i],P=r.v.map(k=>px(V[k])),n=P.length;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+ const r=R[i],ck=r.v.join(" ")+"|"+r.n.length,hit=INRC.get(ck);if(hit){r.cx=hit[0];r.cy=hit[1];r.th=hit[2];r.fn=hit[3];r.fm=hit[4];return}
+ const P=r.v.map(k=>px(V[k])),n=P.length;let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
  P.forEach(p=>{x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
  const ins=(x,y)=>{let c=false;for(let a=0,b=n-1;a<n;b=a++)if((P[a][1]>y)!=(P[b][1]>y)&&x<(P[b][0]-P[a][0])*(y-P[a][1])/(P[b][1]-P[a][1])+P[a][0])c=!c;return c};
  const dist=(x,y)=>{let m=1e9;for(let a=0;a<n;a++){const A=P[a],B=P[(a+1)%n],dx=B[0]-A[0],dy=B[1]-A[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-A[0])*dx+(y-A[1])*dy)/L)),d=Math.hypot(x-A[0]-t*dx,y-A[1]-t*dy);if(d<m)m=d}return m};
  let bx=0,by=0,bd=-1;
- for(const st of[3,.5]){const g=st==3?[x0,x1,y0,y1]:[bx-4,bx+4,by-4,by+4];for(let x=g[0];x<=g[1];x+=st)for(let y=g[2];y<=g[3];y+=st)if(ins(x,y)){const d=dist(x,y);if(d>bd){bd=d;bx=x;by=y}}}
+ const s1=Math.max(3,Math.max(x1-x0,y1-y0)/32),s2=Math.max(.75,s1/4);
+ for(const st of[s1,s2,.5]){const w=st==s1?0:(st==s2?s1:s2);const g=!w?[x0,x1,y0,y1]:[bx-w,bx+w,by-w,by+w];for(let x=g[0];x<=g[1];x+=st)for(let y=g[2];y<=g[3];y+=st)if(ins(x,y)){const d=dist(x,y);if(d>bd){bd=d;bx=x;by=y}}}
  if(bd<0){bx=P.reduce((q,p)=>q+p[0],0)/n;by=P.reduce((q,p)=>q+p[1],0)/n;bd=1}
  const m=Math.max(bd,1),{th,deg}=pca(P),ux=Math.cos(th),uy=Math.sin(th);let dp=0,dm=0;
  while(dp<500&&ins(bx+ux*dp,by+uy*dp))dp++;while(dm<500&&ins(bx-ux*dm,by-uy*dm))dm++;
  const free=2*Math.min(dp,dm);
  r.cx=bx;r.cy=by;r.th=deg;r.fn=Math.max(5,Math.min(22,m*1.05));r.fm=Math.max(3.5,Math.min(11,m*.7,free*.9/(r.n.length*.6)));
+ INRC.set(ck,[r.cx,r.cy,r.th,r.fn,r.fm]);
 }
 const CCI=[];[13,1,1,6,3,1,2,1,3,2,1,1,1,5,8,8,7,1].forEach((n,c)=>{for(let t=0;t<n;t++)CCI.push(c)});RB.forEach((r,i)=>{r.c=CCI[i]});
 const CNN=["السعودية","الأردن","فلسطين","مصر","العراق","الكويت","سوريا","لبنان","اليمن","عُمان","الإمارات","قطر","البحرين","تركيا","السودان","إيران","ليبيا","تونس"];
+const CPLC=new Map();
 function cpl(c){
- const ps=R.filter(r=>r.c==c),cnt={},E=[],key=(a,b)=>a<b?a+"|"+b:b+"|"+a;
+ const ps=R.filter(r=>r.c==c),sig=c+"|"+ps.map(r=>r.v.join(",")).join(";"),hit=CPLC.get(sig);if(hit)return hit;
+ const cnt={},E=[],key=(a,b)=>a<b?a+"|"+b:b+"|"+a;
  ps.forEach(r=>r.v.forEach((a,j)=>{const k=key(a,r.v[(j+1)%r.v.length]);cnt[k]=(cnt[k]||0)+1}));
  ps.forEach(r=>r.v.forEach((a,j)=>{const b=r.v[(j+1)%r.v.length];if(cnt[key(a,b)]==1)E.push([px(V[a]),px(V[b])])}));
  const Ps=ps.map(r=>r.v.map(k=>px(V[k])));let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
@@ -163,10 +169,10 @@ function cpl(c){
  const inside=(x,y)=>Ps.some(P=>{let k=false;for(let a=0,b=P.length-1;a<P.length;b=a++)if((P[a][1]>y)!=(P[b][1]>y)&&x<(P[b][0]-P[a][0])*(y-P[a][1])/(P[b][1]-P[a][1])+P[a][0])k=!k;return k});
  const dist=(x,y)=>{let m=1e9;for(const[A,B]of E){const dx=B[0]-A[0],dy=B[1]-A[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-A[0])*dx+(y-A[1])*dy)/L)),d=Math.hypot(x-A[0]-t*dx,y-A[1]-t*dy);if(d<m)m=d}return m};
  let bx=(x0+x1)/2,by=(y0+y1)/2,bd=-1;
- for(const st of[4,.7]){const g=st==4?[x0,x1,y0,y1]:[bx-6,bx+6,by-6,by+6];for(let x=g[0];x<=g[1];x+=st)for(let y=g[2];y<=g[3];y+=st)if(inside(x,y)){const d=dist(x,y);if(d>bd){bd=d;bx=x;by=y}}}
+ const c1=Math.max(4,Math.max(x1-x0,y1-y0)/36),c2=Math.max(1,c1/4);for(const st of[c1,c2,.7]){const w=st==c1?0:(st==c2?c1:c2);const g=!w?[x0,x1,y0,y1]:[bx-w,bx+w,by-w,by+w];for(let x=g[0];x<=g[1];x+=st)for(let y=g[2];y<=g[3];y+=st)if(inside(x,y)){const d=dist(x,y);if(d>bd){bd=d;bx=x;by=y}}}
  const A2=Ps.flat(),{th,deg}=pca(A2),ux=Math.cos(th),uy=Math.sin(th);let dp=0,dm=0;
  while(dp<700&&inside(bx+ux*dp,by+uy*dp))dp++;while(dm<700&&inside(bx-ux*dm,by-uy*dm))dm++;
- const free=2*Math.min(dp,dm),n=CNN[c];return{n,x:bx,y:by,deg,s:Math.max(8,Math.min(46,bd*2/(n.length*.62),free*.9/(n.length*.6)))};
+ const free=2*Math.min(dp,dm),n=CNN[c];const res={n,x:bx,y:by,deg,s:Math.max(8,Math.min(46,bd*2/(n.length*.62),free*.9/(n.length*.6)))};CPLC.set(sig,res);return res;
 }
 const inLand=(x,y)=>LP.some(P=>{let k=false;for(let a=0,b=P.length-1;a<P.length;b=a++)if((P[a][1]>y)!=(P[b][1]>y)&&x<(P[b][0]-P[a][0])*(y-P[a][1])/(P[b][1]-P[a][1])+P[a][0])k=!k;return k});
 const dLand=(x,y)=>{let m=1e9;for(const P of LP)for(let a=0;a<P.length;a++){const A=P[a],B=P[(a+1)%P.length],dx=B[0]-A[0],dy=B[1]-A[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-A[0])*dx+(y-A[1])*dy)/L)),d=Math.hypot(x-A[0]-t*dx,y-A[1]-t*dy);if(d<m)m=d}return m};
@@ -243,6 +249,7 @@ function buildMap(cfg){
  SEA=[seaPl("البحر الأحمر",[34.6,27.4],[37.4,23.2]),seaPl("البحر المتوسط",[26.5,32.3],[33.0,32.3]),seaPl("الخليج العربي",[50.4,27.6],[53.2,25.4])].filter((_,i)=>has([[0,3,14,8],[3,16,17,6,7,2,13],[0,4,5,11,12,10,15]][i]));
 }
 function mapOk(cfg,n){
+ if(!(n>=2)){alert("تحتاج إلى لاعبين اثنين على الأقل لبدء اللعبة (أضف لاعب حاسوب أو ادعُ لاعباً).");return false}
  const prev=MAPCFG;
  if(countRegions(cfg)<6*n){alert("الخريطة المختارة صغيرة لهذا العدد من اللاعبين (تحتاج "+(6*n)+" منطقة على الأقل). اختر نطاقاً أو تفصيلاً أكبر.");return false}
  buildMap(cfg);
@@ -445,7 +452,7 @@ function openHelp(){
 <h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين وتبدأ بخمسة جيوش (ستة إذا زاد اللاعبون على ثلاثة)، ويملك صاحبها أرضين بجانبها عند البداية. ويفوز من يحتل عواصم الجميع.</li><li>اختر نوع الهدف أولاً (مناطق، جيوش، عواصم) ثم يظهر خيار آخر لتحديد العدد: رقم جاهز أو «رقم أختاره»، أو «كل المناطق»، أو عدد عواصم الخصوم أو عواصمهم جميعاً.</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
 <h4>الوقت</h4><p>لكل مرحلة مؤقت قابل للتعديل عند البداية. زر <b>⏭ تجاوز الوقت</b> بعد تأكيدك يُكمل الحاسوب الإجراء عنك تلقائياً (يوزع جيوشك عشوائياً، أو يترك الهجوم، أو ينهي التمركز).</p>
 <h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم، والبحرين (جزيرة) متصلة بالشرقية وقطر عبر الجسر والبحر القريب.</p>
-<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها (مع كل المناطق المجاورة لها) إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 6 مناطق لكل لاعب على الأقل. وفي نهاية اللعبة زر «جولة جديدة بنفس اللاعبين» عند المضيف (أو في اللعب المحلي) يعيد البدء بنفس الإعدادات والأسماء. وفي غرفة المضيف زر «مشاركة رابط الدعوة» يرسل رابطاً يدخل منه اللاعب مباشرة إلى الغرفة (يعمل إذا كانت اللعبة مستضافة على موقع). في أهداف العواصم تُحمى كل عاصمة في أول 3 جولات فلا يمكن الهجوم عليها قبل الجولة الرابعة. وهدف زيادة الجيوش صار نسبة من جيوشك عند البداية، وتُضاعف النسبة تلقائياً على الخرائط الصغيرة أو كثرة اللاعبين حتى لا تنتهي اللعبة بسرعة (ويظهر الرقم الفعلي في بطاقة الهدف). يمكنك اختيار تصنيفات الأسئلة (دين وسيرة، تاريخ، جغرافيا، علوم وعامة) قبل البدء. وتتجنب اللعبة الأسئلة التي ظهرت لك في جلسات سابقة على هذا الجهاز ما دام فيه أسئلة جديدة. وفي شاشة النهاية ملخص للمباراة: الفائز وترتيب اللاعبين وجوائز (الأدق تخميناً، أفضل تخمين، أكثر فوزاً بالأسئلة، الأكثر احتلالاً). وإذا انقطع اتصال لاعب وهو مطلوب منه حركة ولم يتحرك 10 ثوانٍ، يلعب الحاسوب مكانه فوراً (وتظهر عليه علامة 🔌) ثم يعود إليه التحكم تلقائياً عند رجوعه. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
+<h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها (مع كل المناطق المجاورة لها) إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 6 مناطق لكل لاعب على الأقل. وفي نهاية اللعبة زر «جولة جديدة بنفس اللاعبين» عند المضيف (أو في اللعب المحلي) يعيد البدء بنفس الإعدادات والأسماء. وفي غرفة المضيف زر «مشاركة رابط الدعوة» يرسل رابطاً يدخل منه اللاعب مباشرة إلى الغرفة (يعمل إذا كانت اللعبة مستضافة على موقع). في أهداف العواصم تُحمى كل عاصمة في أول 3 جولات فلا يمكن الهجوم عليها قبل الجولة الرابعة. وهدف زيادة الجيوش صار نسبة من جيوشك عند البداية، وتُضاعف النسبة تلقائياً على الخرائط الصغيرة أو كثرة اللاعبين حتى لا تنتهي اللعبة بسرعة (ويظهر الرقم الفعلي في بطاقة الهدف). يمكنك اختيار تصنيفات الأسئلة (دين وسيرة، تاريخ، جغرافيا، علوم وعامة) قبل البدء. وتتجنب اللعبة الأسئلة التي ظهرت لك في جلسات سابقة على هذا الجهاز ما دام فيه أسئلة جديدة. وفي شاشة النهاية ملخص للمباراة: الفائز وترتيب اللاعبين وجوائز (الأدق تخميناً، أفضل تخمين، أكثر فوزاً بالأسئلة، الأكثر احتلالاً). ولاعب الحاسوب له شخصية: متوازن، أو هجومي (يهاجم أكثر ويطارد العواصم)، أو حذر (يهاجم أقل ويدافع عن أراضيه المهددة)، وتُختار عشوائياً أو يحددها المضيف. وإذا انقطع اتصال لاعب وهو مطلوب منه حركة ولم يتحرك 10 ثوانٍ، يلعب الحاسوب مكانه فوراً (وتظهر عليه علامة 🔌) ثم يعود إليه التحكم تلقائياً عند رجوعه. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
 <h4>التعليقات السريعة</h4><p>زر 💬 على الخريطة يفتح رموز المشاعر (غاضب، حزين، يضحك...). اضغط واحداً فيظهر للجميع أسفل يسار الخريطة ويصعد كالبث مع كلمة صغيرة ثم يختفي بعد ثوانٍ.</p><h4>تنبيه بداية السؤال</h4><p>عند بدء كل سؤال: اهتزاز طويل (أندرويد) ووميض للشاشة، ووميض لعنوان التبويب وإشعار إن كانت الصفحة في الخلفية. تختار منها من الإعدادات.</p><h4>الحاسوب</h4><p>ثلاثة مستويات (سهل ومتوسط وصعب). دقة إجاباته تتموّج بين الجولات حسب قوة كل حاسوب، فلا يكون قوياً دائماً.</p>
 <button onclick="closeHelp()">تم</button></div>`;
  document.body.appendChild(d)}
@@ -456,7 +463,7 @@ function openSet(){
  document.body.appendChild(d);$("cl").value=CFG.lab;$("ccm").value=camMode();$("ccm").onchange=e=>{CFG.cam=+e.target.value;saveCfg()};
  $("cs").onchange=e=>{CFG.snd=e.target.checked;saveCfg();if(CFG.snd)SND.click()};$("cv").onchange=e=>{CFG.vib=e.target.checked;saveCfg();try{if(CFG.vib&&navigator.vibrate)navigator.vibrate(200)}catch(x){}};$("cfl").onchange=e=>{CFG.fl=e.target.checked;saveCfg()};$("ctt").onchange=e=>{CFG.tt=e.target.checked;saveCfg()};$("cnt").onchange=e=>{CFG.nt=e.target.checked;saveCfg();try{if(CFG.nt&&window.Notification&&Notification.permission=="default")Notification.requestPermission()}catch(x){}};$("cl").onchange=e=>{CFG.lab=e.target.value;saveCfg();vb()};
 }
-const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p>`;
+const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p><p>شخصية الحاسوب: <select id="bp" style="width:auto"><option value="r" selected>متنوعة (عشوائية)</option><option value="0">متوازن</option><option value="1">هجومي</option><option value="2">حذر</option></select></p>`;
 const NET={role:"",conns:[],seat:0,ep:0,age:0,t:0};
 const GOALH=`<p>نطاق الخريطة: <select id="msc" onchange="mapUi(1)"><option value="all">كل الدول</option><option value="gulf">الخليج واليمن</option><option value="levant">المشرق والعراق وتركيا</option><option value="nile">مصر والسودان وليبيا وتونس</option><option value="irg">الخليج والعراق وإيران</option><option value="x">أختار الدول بنفسي…</option></select></p><div id="mcu" style="display:none;line-height:2">${CNN.map((n,c)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="mc${c}" onchange="mapUi(1)" style="width:auto"> ${n}</label>`).join("")}</div><p>تفصيل المدن: <select id="mlv" onchange="mapUi(1)"><option value="2">سهل: مدينة لكل دولة</option><option value="1">متوسط: مدينتان</option><option value="0" selected>صعب: كل المدن</option></select> <span id="mcnt" style="color:var(--mut)"></span></p><p>تصنيفات الأسئلة: ${QCN.map((n,i)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="qc${i}" checked onchange="qcUi()" style="width:auto"> ${n}</label>`).join("")} <span id="qcnt" style="color:var(--mut)"></span></p><p>هدف الفوز: <select id="gt" style="width:auto" onchange="goalSync()"><option value="c" selected>احتلال مناطق (مدن)</option><option value="a">زيادة الجيوش</option><option value="k">احتلال العواصم ★</option></select> <select id="gs" style="width:auto" onchange="goalSync(this.value)"><option value="5">5 فوق ما تملك</option><option value="8">8 فوق ما تملك</option><option value="12" selected>12 فوق ما تملك</option><option value="20">20 فوق ما تملك</option><option value="all">كل المناطق</option><option value="x">رقم أختاره…</option></select> <input id="cn" type="number" value="10" min="1" max="500" style="width:60px;display:none"></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>8</option><option>12</option><option selected>20</option><option>30</option><option>50</option><option value="0">لا نهائية</option></select></p>`;
 const GOALOPT={c:[["5","5 مناطق فوق ما تملك"],["8","8 مناطق فوق ما تملك"],["12","12 منطقة فوق ما تملك"],["20","20 منطقة فوق ما تملك"],["all","كل المناطق"],["x","رقم أختاره…"]],a:[["15","+15% من جيوشك عند البداية"],["30","+30% من جيوشك عند البداية"],["50","+50% من جيوشك عند البداية"],["100","+100% (ضعف جيوشك)"],["x","نسبة أختارها…"]],k:[["all","عواصم جميع اللاعبين"],["1","عاصمة واحدة من الخصوم"],["2","عاصمتان من الخصوم"],["3","3 عواصم من الخصوم"]]};
@@ -484,6 +491,7 @@ let migT=0;/* ============ الشبكة والاتصال (PeerJS) ============ *
 const hid=(c,e)=>"asr-"+String(c).toUpperCase().trim()+(e?"-"+e:"");
 function onConn(c){
  c.on("data",d=>{
+  if(!d||typeof d!="object")return;
   if(d.t=="ping2"){try{c.send({t:"pong",id:d.id})}catch(e){}return}
   if(d.t=="hello"&&c.seat==null){
    let s=-1;
@@ -513,6 +521,7 @@ function host(){
  if(!S)lobby();
 }
 function onData(d){
+ if(!d||typeof d!="object")return;
  if(NET.role=="host")return;
  NET.age=0;
  if(d.t=="hello"){NET.seat=d.seat;NET.joined=1;try{sessionStorage.setItem("asrseat",d.seat)}catch(e){}if(!S)lobby()}
@@ -548,7 +557,7 @@ function lost(why){
 NET.log=[];
 function nlog(m){try{NET.log.push([Date.now(),m]);if(NET.log.length>14)NET.log.shift()}catch(e){}}
 const logTxt=()=>NET.log.slice(-7).map(x=>new Date(x[0]).toISOString().slice(14,19)+" "+x[1]).join("<br>");
-const APPV="2.0 · 2026-10-25";
+const APPV="2.1 · 2026-10-25";
 function diagText(){
  const L=[];const a=(k,v)=>L.push(k+": "+v);
  a("الإصدار",APPV);a("الوقت",new Date().toISOString());
@@ -591,11 +600,11 @@ function probe(){
  c.on("data",onData);c.on("close",()=>{if(NET.c===c){migT=0;lost()}});
  setTimeout(()=>{if(NET.peer===pr&&NET.mig&&NET.c===c&&!c.open){NET.c=null;try{c.close()}catch(e){}NET.allUn=false;nextProbe()}},8000);
 }
-function becomeHost(ep){
+function becomeHost(ep,quiet){
  if(NET.peer)try{NET.peer.destroy()}catch(e){}
  NET.role="host";NET.ep=ep;NET.mig=false;migT=0;NET.fresh=true;NET.wait=0;NET.hs0=NET.t;NET.conns=[];NET.ready=0;
  if(S.q&&S.q[1]==null){const f=Q.find(x=>x[0]==S.q[0]);if(f)S.q=f}
- S.ep=ep;S.hs=NET.seat;S.ev={id:(S.ev?S.ev.id:0)+1,t:"🔁 انتقلت الاستضافة إلى "+dn(NET.seat),c:NET.seat};
+ S.ep=ep;S.hs=NET.seat;if(!quiet)S.ev={id:(S.ev?S.ev.id:0)+1,t:"🔁 انتقلت الاستضافة إلى "+dn(NET.seat),c:NET.seat};
  const pr=NET.peer=new Peer(hid(NET.code,ep));
  pr.on("disconnected",()=>{try{if(NET.peer===pr&&!pr.destroyed)pr.reconnect()}catch(e){}});
  pr.on("open",()=>{NET.ready=1;render()});
@@ -655,7 +664,8 @@ function dcWatch(){
 }
 let hb=0;
 setInterval(()=>{NET.t++;if(NET.role=="host"){if(++hb%3==0)NET.conns.forEach(c=>{if(c&&c.open)c.send({t:"ping",k:S&&S.key,sq:S&&S.sq})})}else if(NET.role=="client"&&S&&S.multi&&S.ph!="end"&&!NET.mig&&++NET.age>12)lost();if(NET.role=="host"&&hb%15==0)chkNewer();if(NET.role=="host")try{dcWatch()}catch(e){}
- if(NET.role=="client"&&S&&S.multi&&S.ph!="end"){if(NET.mig&&NET.t-(NET.rp||0)>15){migT=0;lost("لا تقدم منذ 15 ثانية")}else if(!NET.mig&&NET.wait&&NET.t-(NET.wt||0)>12){migT=0;lost("انتظار الحالة طويل")}}},1000);
+ if(NET.role=="client"&&S&&S.multi&&S.ph!="end"){if(NET.mig&&NET.t-(NET.rp||0)>15){migT=0;lost("لا تقدم منذ 15 ثانية")}else if(!NET.mig&&NET.wait&&NET.t-(NET.wt||0)>12){migT=0;lost("انتظار الحالة طويل")}}
+ if(NET.role=="host"&&S&&S.multi&&S.ph!="end"&&!NET.ready&&NET.t-(NET.hs0||0)>10){nlog("المضيف: لم تُسجَّل الغرفة — إعادة المحاولة");becomeHost(NET.ep,1)}},1000);
 const inviteUrl=()=>{try{if(/^https?:$/.test(location.protocol)){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("room",NET.code);return u.toString()}}catch(e){}return""};
 function inviteNote(m){const e=$("invn");if(e){e.textContent=m;setTimeout(()=>{const x=$("invn");if(x&&x.textContent==m)x.textContent=""},5000)}}
 function copyText(t,code){
@@ -669,7 +679,7 @@ async function shareInvite(){
  if(url)copyText(txt+"\n"+url,0);else{copyText(txt,0);inviteNote("الرابط المباشر يعمل إذا كانت اللعبة مستضافة على موقع؛ نسخنا الكود فقط.")}
 }
 function lobby(){
- const a=$("app"),h=NET.role=="host",ids=["mr","tq","tr","td","ta","tf","bn","bd","am","cn"],sv=ids.map(i=>$(i)&&$(i).value),gt0=$("gt")&&$("gt").value,gs0=$("gs")&&$("gs").value,sc=$("tmc")&&$("tmc").checked;
+ const a=$("app"),h=NET.role=="host",ids=["mr","tq","tr","td","ta","tf","bn","bd","bp","am","cn"],sv=ids.map(i=>$(i)&&$(i).value),gt0=$("gt")&&$("gt").value,gs0=$("gs")&&$("gs").value,sc=$("tmc")&&$("tmc").checked;
  let t=`<div class="side"><div class="card"><h2>غرفة اللعب</h2>`;
  if(NET.err)t+=`<p class="msg">تعذّر الاتصال: ${NET.err}</p>`;
  if(h){
@@ -681,6 +691,7 @@ function lobby(){
  ids.forEach((i,k)=>{const e=$(i);if(e&&sv[k]!=null)e.value=sv[k]});{const t=$("tmc");if(t&&sc!=null)t.checked=sc}if(gt0){$("gt").value=gt0;goalSync(gs0)}
 }
 function goOnline(){
+ if(NET.role!="host")return;
  {const c0=NET.conns.filter(c=>c&&c.open).length+1,b0=Math.min(+$("bn").value||0,8-c0);if(!mapOk(readMap(),c0+b0))return}
  const l=NET.conns.filter(c=>c&&c.open);NET.conns=[null,...l];
  l.forEach((c,i)=>{c.seat=i+1;c.send({t:"hello",seat:i+1})});NET.names=[MYN,...l.map(c=>c.nm||"")];
@@ -704,10 +715,11 @@ function qm(){
  return `<div class="card"><h3>سؤال الجولة</h3><p>${S.q[0]}</p>`+(g[NET.seat]?`<p>سُجّلت إجابتك. بانتظار الآخرين (${k} من ${al}).</p>`:`<p>أنت <span class="dot" style="background:${PC[NET.seat]}"></span><b>${dn(NET.seat)}</b>: اكتب تقديرك:</p>${ansInput()} <button onclick="act('guess')">تأكيد</button>`)+`<div class="msg">${S.msg}</div></div>`;
 }
 function act(t,a){
+ if(!S)return;
  if(t=="clk"&&Z.moved)return;
  if(NET.role=="client"&&(!NET.fresh||NET.mig||NET.wait))return;
  if(t=="clk")SND.click();
- if(t=="guess"){const e=$("gv");a=parseFloat(e.value);e.value=""}
+ if(t=="guess"){const e=$("gv");a=e?parseFloat(e.value):NaN;if(e)e.value=""}
  if(t=="skip"){askSkip=false;const e=$("gv");if(e)e.value=""}
  if(t=="atk"||t=="mv")a=CFN;
  if(NET.role=="client")return NET.c&&NET.c.open&&NET.c.send({t,a,k:S.key});
@@ -753,7 +765,7 @@ function start(n,o){
   rest=rest.filter(t=>S.T[t]==null);
  }
  shuf(rest).forEach(t=>{const cs=[...Array(n).keys()].map(cnt),mn=Math.min(...cs);S.T[t]=shuf([...Array(n).keys()].filter(p=>cs[p]==mn))[0]});
- S.lv=Array(n).fill(S.diff);S.pw=S.lv.map(l=>[.42,.6,.78][l]+(Math.random()-.5)*.16);S.hum=S.bots.map(b=>!b);
+ S.lv=Array(n).fill(S.diff);S.pw=S.lv.map(l=>[.42,.6,.78][l]+(Math.random()-.5)*.16);S.hum=S.bots.map(b=>!b);S.pr=o&&o.pr?o.pr.slice():Array.from({length:n},()=>{const v=$("bp")?$("bp").value:"r";return v=="r"?Math.floor(Math.random()*3):+v});
  S.i0=[...Array(n).keys()].map(cnt);S.ia=[...Array(n).keys()].map(armies);
  if(/^c\d+$/.test(S.mode)){const mx=Math.max(2,Math.floor((N-Math.ceil(N/n))*.75));if(+S.mode.slice(1)>mx)S.mode="c"+mx}
 if(S.mode[0]=="k")S.mode="k"+Math.max(1,Math.min(+S.mode.slice(1),n-1));
@@ -834,20 +846,23 @@ function botGuess(p){const a=S.q[1],sc=S.q[2]||Math.abs(a),pw=S.pw&&S.pw[p]!=nul
 function skipBots(){while(S.gi<S.n&&(!alive(S.gi)||S.bots[S.gi])){if(alive(S.gi))S.gs[S.gi]=botGuess(S.gi);S.gi++}}
 const wins=(n,da,att,def)=>n>da||(n==da&&((S.cl||[])[att]||0)>((S.cl||[])[def]||0));
 /* ============ لاعب الحاسوب ============ */
-function botVal(c,j){let v=1+1.5/(S.A[j]+1)+.01*cnt(S.T[j]);if(capM()){if(S.cap.includes(j))v+=4;if(nbr(j).includes(S.cap[c]))v+=.8}return v}
+const pr=c=>S.pr&&S.pr[c]||0;
+const capN=c=>{const b=[3,8,14][lv(c)];return pr(c)==1?Math.ceil(b*1.6):pr(c)==2?Math.max(2,Math.floor(b*.85)):b};
+function botVal(c,j){let v=1+1.5/(S.A[j]+1)+.01*cnt(S.T[j]);if(pr(c)==1&&capM()&&S.cap.includes(j))v+=2;if(pr(c)==2)v+=.3*nbr(j).filter(k=>S.T[k]==c).length;if(capM()){if(S.cap.includes(j))v+=4;if(nbr(j).includes(S.cap[c]))v+=.8}return v}
 function botNeed(c,j){const da=S.A[j];return Math.max(1,wins(da,da,c,S.T[j])?da:da+1)}
 function botDeploy(c,own){
  const bd=own.filter(i=>nbr(i).some(j=>S.T[j]!=c));
  if(!bd.length)return own[Math.floor(Math.random()*own.length)];
+ if(pr(c)==2&&Math.random()<.6){let b=bd[0],bt=-1e9;bd.forEach(i=>{const th=Math.max(...nbr(i).filter(j=>S.T[j]!=c).map(j=>S.A[j]))-S.A[i];if(th>bt){bt=th;b=i}});return b}
  if(lv(c)==0&&Math.random()<.5)return bd[Math.floor(Math.random()*bd.length)];
  let best=bd[0],bs=-1e9;
  bd.forEach(i=>{let sc=-1e9;nbr(i).forEach(j=>{if(S.T[j]==c)return;const gap=botNeed(c,j)-(S.A[i]-1),v=botVal(c,j)-.6*Math.max(0,gap);if(v>sc)sc=v});
   if(capM()&&S.cap[c]==i&&lv(c)>0)sc+=2;sc+=.1*nbr(i).filter(j=>S.T[j]!=c).length;if(sc>bs){bs=sc;best=i}});
  return best}
 function botAttack(c,own){
- if((S.bn||0)>=[3,8,14][lv(c)]||(lv(c)==0&&Math.random()<.4))return null;
+ if((S.bn||0)>=capN(c)||(lv(c)==0&&Math.random()<.4))return null;
  let best=null,bs=-1e9;
- own.forEach(i=>{if(S.A[i]<2)return;nbr(i).forEach(j=>{if(S.T[j]==c||shielded(j))return;const n=botNeed(c,j);if(n>S.A[i]-1)return;const v=botVal(c,j)+.05*(S.A[i]-n)+(lv(c)==0?Math.random():0);if(v>bs){bs=v;best=[i,j,n]}})});
+ own.forEach(i=>{if(S.A[i]<2)return;nbr(i).forEach(j=>{if(S.T[j]==c||shielded(j))return;const n=botNeed(c,j);if(n>S.A[i]-1-(pr(c)==2&&S.A[i]>5?1:0))return;const v=botVal(c,j)+.05*(S.A[i]-n)+(lv(c)==0?Math.random():0);if(v>bs){bs=v;best=[i,j,n]}})});
  return best}
 function botFort(c,own){
  if(!lv(c))return null;
@@ -865,10 +880,10 @@ function scheduleBot(){
  if(bt||NET.role=="client"||!S||!S.bots||!S.bots[S.cur]||!["deploy","attack","fortify"].includes(S.ph))return;
  bt=setTimeout(()=>{bt=0;if(S&&S.bots&&S.bots[S.cur]&&["deploy","attack","fortify"].includes(S.ph)){try{botStep()}catch(e){try{timeout()}catch(e2){}}}},S.ph=="deploy"?230:700);
 }
-function toBot(i,l){if(NET.role!="host"||!S||!S.multi)return;S.bots[i]=true;S.lv[i]=l;S.pw[i]=[.42,.6,.78][l]+(Math.random()-.5)*.16;botAsk=-1;
+function toBot(i,l){if(NET.role!="host"||!S||!S.multi)return;S.bots[i]=true;S.lv[i]=l;S.pw[i]=[.42,.6,.78][l]+(Math.random()-.5)*.16;if(S.pr&&S.pr[i]==null)S.pr[i]=0;botAsk=-1;
  if(S.ph=="q"&&S.gs[i]===undefined&&alive(i)){S.gs[i]=botGuess(i);if([...Array(S.n).keys()].filter(alive).every(p=>S.gs[p]!==undefined))return results()}render()}
 function toHuman(i){if(NET.role!="host"||!S)return;S.bots[i]=false;render()}
-const stripX=i=>{let o="";if(S.bots[i])o+=` · ${["سهل","متوسط","صعب"][S.lv[i]]} (${Math.round(S.pw[i]*100)}%)`;if(NET.role=="host"&&S.multi&&i!=S.hs){if(!S.bots[i]){o+=`<br><button class="s sm" onclick="botAsk=${i};render()">🤖 تحويل إلى حاسوب</button>`;if(NET.conns[i]&&NET.conns[i].open)o+=xferBtn(i)}else if(S.hum&&S.hum[i])o+=`<br><button class="s sm" onclick="toHuman(${i})">👤 إعادة اللاعب</button>`}return o};
+const stripX=i=>{let o="";if(S.bots[i])o+=` · ${["سهل","متوسط","صعب"][S.lv[i]]} (${Math.round(S.pw[i]*100)}%) · ${["متوازن","هجومي","حذر"][pr(i)]}`;if(NET.role=="host"&&S.multi&&i!=S.hs){if(!S.bots[i]){o+=`<br><button class="s sm" onclick="botAsk=${i};render()">🤖 تحويل إلى حاسوب</button>`;if(NET.conns[i]&&NET.conns[i].open)o+=xferBtn(i)}else if(S.hum&&S.hum[i])o+=`<br><button class="s sm" onclick="toHuman(${i})">👤 إعادة اللاعب</button>`}return o};
 const VER=11;
 function save(){try{if(!S||S.ph=="end"){localStorage.removeItem("asr_save");return}if(NET.role=="client"&&S.multi&&(!NET.fresh||NET.wait))return;localStorage.setItem("asr_save",JSON.stringify({ver:VER,ts:Date.now(),role:NET.role,code:NET.code,seat:NET.seat,S}))}catch(e){}}
 function leave(){try{localStorage.removeItem("asr_save");sessionStorage.removeItem("asrseat")}catch(e){}location.reload()}
@@ -892,11 +907,11 @@ function restore(){
  }catch(e){try{localStorage.removeItem("asr_save")}catch(_){}S=null;NET.role="";render()}
 }
 function cfInfo(n){const a=S.sel,d=S.tgt;if(S.ph=="attack"){const da=S.A[d],win=wins(n,da,S.cur,S.T[d]),k=Math.ceil(n/2);return win?{sa:S.A[a]-n,sd:Math.max(1,n-da),win}:{sa:S.A[a]-k,sd:Math.max(1,da-k),win}}return{sa:S.A[a]-n,sd:S.A[d]+n,win:1}}
-function cfSet(v){const m=S.A[S.sel]-1;CFN=Math.max(1,Math.min(m,Math.round(v)));const r=$("cfr");if(r)r.value=CFN;const e=$("cfn");if(e){e.textContent=CFN;e.className="cfnn "+(S.ph=="attack"?(cfInfo(CFN).win?"w":"l"):"")}}
+function cfSet(v){if(!S||S.sel==null)return;const m=S.A[S.sel]-1;CFN=Math.max(1,Math.min(m,Math.round(v)));const r=$("cfr");if(r)r.value=CFN;const e=$("cfn");if(e){e.textContent=CFN;e.className="cfnn "+(S.ph=="attack"?(cfInfo(CFN).win?"w":"l"):"")}}
 function cfHTML(){const a=S.sel,d=S.tgt,m=S.A[a]-1,at=S.ph=="attack",k=S.ph+a+">"+d;
  if(k!=cfKey){cfKey=k;CFN=at?Math.min(m,botNeed(S.cur,d)):m}CFN=Math.max(1,Math.min(m,CFN));const i=cfInfo(CFN);
  return `<div class="cf"><div class="cft"><span style="color:#22c55e">${R[a].n}</span> ${at?"⚔":"➜"} <span style="color:${at?"#ef4444":"#3b82f6"}">${R[d].n}</span>${S.tm&&L()[S.ph]?` <span class="dkt">⏱ <b class="tmv">${S.t}</b></span>`:""}</div><div class="cfs"><button class="s" onclick="cfSet(CFN-1)">−</button><b id="cfn" class="cfnn ${at?(i.win?"w":"l"):""}">${CFN}</b><button class="s" onclick="cfSet(CFN+1)">+</button></div><input id="cfr" type="range" min="1" max="${m}" value="${CFN}" oninput="cfSet(+this.value)"><div class="cfb"><button onclick="cfOk()">✓ تأكيد</button><button class="s" onclick="cfNo()">✗ تراجع</button></div></div>`}
-const cfOk=()=>act(S.ph=="attack"?"atk":"mv"),cfNo=()=>act("undo");
+const cfOk=()=>S&&act(S.ph=="attack"?"atk":"mv"),cfNo=()=>act("undo");
 function atk(n){
  const a=S.sel,d=S.tgt,da=S.A[d];
   if(wins(n,da,S.cur,S.T[d])){if(S.st&&S.st[S.cur]){S.st[S.cur].cap++;S.st[S.cur].aw++}S.A[a]-=n;S.T[d]=S.cur;S.A[d]=Math.max(1,n-da);S.msg=`استولى ${dn(S.cur)} على ${R[d].n}.`}
@@ -921,7 +936,7 @@ function endTurn(){
 }
 function rematch(){
  if(!S||S.ph!="end"||NET.role=="client")return;
- const n=S.n,o={map:S.map,ans:S.ans,bots:S.hum.map(h=>!h),diff:S.diff,lim:JSON.parse(JSON.stringify(S.lim)),mode:S.mode,max:S.max,tm:S.tm,cats:S.cats,names:(S.names||[]).slice(),hs:NET.role=="host"?NET.seat:0,ep:S.ep||0,sq:S.sq||0},away=[];
+ const n=S.n,o={map:S.map,ans:S.ans,bots:S.hum.map(h=>!h),diff:S.diff,lim:JSON.parse(JSON.stringify(S.lim)),mode:S.mode,max:S.max,tm:S.tm,cats:S.cats,pr:S.pr?S.pr.slice():null,names:(S.names||[]).slice(),hs:NET.role=="host"?NET.seat:0,ep:S.ep||0,sq:S.sq||0},away=[];
  if(NET.role=="host")o.bots=o.bots.map((b,p)=>{if(b||p==NET.seat)return b;if(NET.conns[p]&&NET.conns[p].open)return false;away.push(p);return true});
  start(n,o);
  if(S&&S.n==n&&away.length){away.forEach(p=>{S.away[p]=true;S.hum[p]=true});render()}
