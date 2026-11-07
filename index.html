@@ -46,6 +46,7 @@ button{font:inherit;background:var(--ac);color:#fff;border:0;border-radius:8px;p
 button.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
 input,select{font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:5px;width:110px}
 .pr{border:2px solid var(--bd);border-radius:8px;padding:3px 8px;margin-bottom:4px;font-size:13px;background:var(--card)}
+.sh{font-weight:bold;margin:12px 0 4px}.sm{color:var(--mut);margin:4px 0;font-size:13px}.seg{display:flex;gap:8px}.seg button{flex:1;min-width:0;padding:11px 6px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:15px}.seg button.on{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:bold}.gset details{margin:6px 0}.gset summary{color:var(--ac);cursor:pointer;padding:6px 0}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:5px}
 body.sym .dot{width:17px;height:17px;line-height:17px;text-align:center;font-size:11px;font-weight:bold;color:#fff;text-shadow:0 0 2px #000,0 0 2px #000;border:1px solid #fff;vertical-align:middle}
 body.sym .dot::after{content:attr(data-s)}
@@ -268,9 +269,9 @@ function mapOk(cfg,n){
  buildMap(cfg);
  if(!mapConnected()){buildMap(prev);alert("المناطق المختارة غير متصلة ببعضها (يفصل بينها دول غير مختارة). أضف الدول التي بينها أو اختر نطاقاً آخر.");return false}
  return true}
-const MAPSEL={sc:"all",lv:"0",x:[]};
+const MAPSEL={sc:"all",lv:"2",x:[]};
 function readMap(){const m=$("msc"),l=$("mlv"),v=m?m.value:"all";let sc=null;if(v=="x"){sc=[];CNN.forEach((_,c)=>{const e=$("mc"+c);if(e&&e.checked)sc.push(c)})}else if(MAPP[v])sc=MAPP[v];return{sc,lv:l?+l.value:0}}
-function goalAuto(){const t=$("gt");if(!t)return;const n=countRegions(readMap());goalSync(String(t.value=="c"?(n<20?5:n<50?8:12):t.value=="a"?"30":"all"))}
+function goalAuto(){}
 function mapUi(u){
  const m=$("msc"),l=$("mlv");if(!m||!l)return;
  MAPSEL.sc=m.value;MAPSEL.lv=l.value;MAPSEL.x=CNN.map((_,c)=>{const e=$("mc"+c);return!!(e&&e.checked)});
@@ -278,7 +279,7 @@ function mapUi(u){
  const k=$("mcnt");if(k)k.textContent="("+countRegions(readMap())+" منطقة)";
  if(u)goalAuto();
 }
-function mapRestore(){const m=$("msc"),l=$("mlv");if(!m||!l)return;m.value=MAPSEL.sc;l.value=MAPSEL.lv;CNN.forEach((_,c)=>{const e=$("mc"+c);if(e)e.checked=!!MAPSEL.x[c]});QCC.forEach((_,i)=>{const e=$("qc"+i);if(e)e.checked=QSEL[i]});qcUi();mapUi(0)}
+function mapRestore(){const m=$("msc"),l=$("mlv");if(!m||!l)return;m.value=MAPSEL.sc;l.value=MAPSEL.lv;CNN.forEach((_,c)=>{const e=$("mc"+c);if(e)e.checked=!!MAPSEL.x[c]});QCC.forEach((_,i)=>{const e=$("qc"+i);if(e)e.checked=QSEL[i]});qcUi();mapUi(0);Object.keys(DET).forEach(id=>{const e=$(id);if(e)e.open=!!DET[id]});homeUi()}
 if(typeof MutationObserver!="undefined"){try{new MutationObserver(()=>{const m=$("msc");if(m&&!m.dataset.i){m.dataset.i=1;mapRestore()}}).observe($("app"),{childList:true,subtree:true})}catch(e){}}
 buildMap({});
 const lod=()=>{const t=Math.max(0,Math.min(1,(Z.w-600)/600)),e=t*t*(3-2*t),u=Math.max(0,Math.min(1,(Z.w-350)/350)),sv=(u*u*(3-2*u)).toFixed(2);if(CFG.lab=="countries")return{c:"1.00",k:"0.00",s:sv};if(CFG.lab=="cities")return{c:"0.00",k:"1.00",s:sv};return{c:e.toFixed(2),k:(1-e).toFixed(2),s:sv}};
@@ -484,7 +485,7 @@ function openHelp(){
 <p>ترتيب اللعب يدور: يبدأ كل جولة لاعب مختلف حتى لا تكون الأفضلية لمن يلعب أولاً.</p><h4>التوزيع</h4><p>في بداية دورك تأخذ جيشاً لكل 3 مناطق تملكها (حداً أدنى 2) مضافاً إلى ما كسبته من السؤال. اضغط على أرضك لتضع جيشاً في كل ضغطة.</p>
 <h4>الهجوم</h4><p>اختر أرضك (فيها جيشان فأكثر) ثم أرضاً مجاورة لعدوك، فتظهر نافذة تختار فيها عدد المهاجمين بـ + و − ثم ✓ للتأكيد أو ✗ للتراجع. يبقى في أرضك جيش واحد على الأقل.</p><ul><li><b>ينجح الهجوم</b> إذا زاد عدد المهاجمين على جيوش المدافعين ولو بواحد: تحتل الأرض ويبقى فيها الفرق (جيش على الأقل).</li><li><b>التعادل:</b> يفوز الأقرب جواباً منكما في سؤال الجولة، فإن تساويا فالمدافع.</li><li><b>الفشل:</b> يخسر الطرفان بالتساوي نصف ما أُرسل (المدافع يبقى فيه جيش على الأقل). الرقم أخضر في النافذة إن كان الهجوم ناجحاً وأحمر إن كان فاشلاً.</li></ul>
 <h4>إعادة التمركز</h4><p>نقلة واحدة: انقل جيوشاً من أرض لك إلى أرض أخرى لك متصلة بها عبر أراضيك، ثم ينتهي دورك.</p>
-<h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين وتبدأ بخمسة جيوش (ستة إذا زاد اللاعبون على ثلاثة)، ويملك صاحبها أرضين بجانبها عند البداية. ويفوز من يحتل عواصم الجميع.</li><li>اختر نوع الهدف أولاً (مناطق، جيوش، عواصم) ثم يظهر خيار آخر لتحديد العدد: رقم جاهز أو «رقم أختاره»، أو «كل المناطق»، أو عدد عواصم الخصوم أو عواصمهم جميعاً.</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
+<h4>الفوز</h4><ul><li><b>احتلال عدد من المناطق</b> فوق ما تملكه عند البداية.</li><li><b>زيادة جيوشك</b> بعدد معين فوق ما بدأت به.</li><li><b>احتلال جميع المناطق.</b></li><li><b>احتلال العواصم ★:</b> لكل لاعب عاصمة بعيدة عن الآخرين وتبدأ بخمسة جيوش (ستة إذا زاد اللاعبون على ثلاثة)، ويملك صاحبها أرضين بجانبها عند البداية. ويفوز من يحتل عواصم الجميع.</li><li>شاشة البداية ثلاث خطوات: نوع الهدف (المناطق: احتلال كل المناطق، العواصم: احتلال عواصم جميع اللاعبين، الجيوش: أن يصل أكبر جيش إلى عدد محدد)، ثم الخريطة (سهلة أو متوسطة أو صعبة)، ثم الجولات (لا نهائية افتراضياً). ويمكن تعديل العدد المطلوب والدول والجولات من الخيارات المطوية، والباقي في «خيارات متقدمة».</li><li>إن انتهت الجولات دون فائز يفوز صاحب أكثر المناطق ثم الجيوش.</li></ul>
 <h4>الوقت</h4><p>لكل مرحلة مؤقت قابل للتعديل عند البداية. زر <b>⏭ تجاوز الوقت</b> بعد تأكيدك يُكمل الحاسوب الإجراء عنك تلقائياً (يوزع جيوشك عشوائياً، أو يترك الهجوم، أو ينهي التمركز).</p>
 <h4>الخريطة</h4><p>قرّب بعجلة الفأرة أو بإصبعين، وحرّكها بالسحب، أو استخدم أزرار + و − و ⌂. عند التصغير تظهر أسماء الدول وعند التكبير أسماء المدن (ويمكن تثبيت أحدهما من الإعدادات). البحار بلون الخلفية ولا تمنع الهجوم، والبحرين (جزيرة) متصلة بالشرقية وقطر عبر الجسر والبحر القريب.</p>
 <h4>اللعب الأونلاين</h4><p>المضيف ينشئ غرفة بكود ويُرسله للاعبين (حتى 8 لاعبين). اللعبة تُحفظ تلقائياً فتعود كما كانت بعد تحديث الصفحة. وللمضيف زر 🤖 لتحويل لاعب منقطع إلى حاسوب بمستوى يختاره ثم 👤 لإعادته، وزر 👑 لنقل الاستضافة إلى لاعب آخر. يمكن لكل لاعب كتابة اسمه (يظهر مع بطاقته وفي الرسائل، ويظهر اسمه الأول مع التعليقات). في الإعدادات «حركة الكاميرا التلقائية»: خفيفة تقرّب من المنطقة التي تضغطها (مع كل المناطق المجاورة لها) إذا كانت صغيرة أو خارج الشاشة، وكاملة تتبع كل هجوم وحركة للاعبين الآخرين ثم تعود للنظرة العامة. وقبل البدء اختر «نطاق الخريطة» (كل الدول أو مجموعة منها أو دول تختارها) و«تفصيل المدن»: سهل مدينة لكل دولة، متوسط مدينتان، صعب كل المدن. ويضبط الهدف نفسه تلقائياً على حجم الخريطة، وتحتاج الخريطة إلى 6 مناطق لكل لاعب على الأقل. عند بداية كل مرحلة تُؤطَّر الكاميرا منطقة عملك: كل أراضيك في التوزيع، وأراضيك القادرة على الهجوم مع أعدائها المجاورين في الهجوم، والأراضي المتاحة للنقل في إعادة التمركز (ولا تتحرك إن لم يكن هناك ما تفعله)، وعند اختيار أرض للنقل تظهر الأراضي التي يمكن النقل إليها، وبعد انتهاء اختيارك تعود إلى إطار المرحلة بدل الخريطة الكاملة. وفي نهاية اللعبة زر «جولة جديدة بنفس اللاعبين» عند المضيف (أو في اللعب المحلي) يعيد البدء بنفس الإعدادات والأسماء. وفي غرفة المضيف زر «مشاركة رابط الدعوة» يرسل رابطاً يدخل منه اللاعب مباشرة إلى الغرفة (يعمل إذا كانت اللعبة مستضافة على موقع). في أهداف العواصم تُحمى كل عاصمة في أول 3 جولات فلا يمكن الهجوم عليها قبل الجولة الرابعة. وهدف زيادة الجيوش صار نسبة من جيوشك عند البداية، وتُضاعف النسبة تلقائياً على الخرائط الصغيرة أو كثرة اللاعبين حتى لا تنتهي اللعبة بسرعة (ويظهر الرقم الفعلي في بطاقة الهدف). يمكنك اختيار تصنيفات الأسئلة (دين وسيرة، تاريخ، جغرافيا، علوم وعامة) قبل البدء. وتتجنب اللعبة الأسئلة التي ظهرت لك في جلسات سابقة على هذا الجهاز ما دام فيه أسئلة جديدة. وفي شاشة النهاية ملخص للمباراة: الفائز وترتيب اللاعبين وجوائز (الأدق تخميناً، أفضل تخمين، أكثر فوزاً بالأسئلة، الأكثر احتلالاً). ولاعب الحاسوب له شخصية: متوازن، أو هجومي (يهاجم أكثر ويطارد العواصم)، أو حذر (يهاجم أقل ويدافع عن أراضيه المهددة)، وتُختار عشوائياً أو يحددها المضيف. وفي الإعدادات خياران لمن يصعب عليه تمييز الألوان: «رموز بجانب ألوان اللاعبين» تضيف شكلاً مميزاً لكل لاعب على الخريطة وفي البطاقات، و«ألوان مناسبة لعمى الألوان» تبدّل لوحة الألوان بأخرى يسهل التمييز بين ألوانها. وإذا انقطع اتصال لاعب وهو مطلوب منه حركة ولم يتحرك 10 ثوانٍ، يلعب الحاسوب مكانه فوراً (وتظهر عليه علامة 🔌) ثم يعود إليه التحكم تلقائياً عند رجوعه. وللمضيف زر 👑 ثابت في شريط الأدوات تحت الخريطة يفتح قائمة بالمتصلين لاختيار المضيف الجديد. وإذا انقطع اتصالك أو حدّثت الصفحة تظهر نافذة «جارٍ الرجوع إلى اللعبة» وتعود تلقائياً إلى لعبة المضيف نفسها بدورها الحالي (ويُلغى تحويلك إلى حاسوب إن كنت قد غبت)، ولا تلعب على نسخة قديمة. ولا يتولى أحد الاستضافة إلا إذا تأكد أن المضيف غاب فعلاً، وإذا حدث خطأ عند المضيف يظهر له زر نقل الاستضافة.</p>
@@ -501,21 +502,61 @@ function openSet(){
 const BOTSH=`<p>طريقة الإجابة: <select id="am" style="width:auto"><option value="num" selected>لوحة أرقام</option><option value="bar">شريط (سهل)</option></select></p><p>لاعبو الحاسوب: <select id="bn" style="width:auto"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select> المستوى: <select id="bd" style="width:auto"><option value="0">سهل</option><option value="1" selected>متوسط</option><option value="2">صعب</option></select></p><p>شخصية الحاسوب: <select id="bp" style="width:auto"><option value="r" selected>متنوعة (عشوائية)</option><option value="0">متوازن</option><option value="1">هجومي</option><option value="2">حذر</option></select></p>`;
 const NET={role:"",conns:[],seat:0,ep:0,age:0,t:0};
 const GOALH=`<p>نطاق الخريطة: <select id="msc" onchange="mapUi(1)"><option value="all">كل الدول</option><option value="gulf">الخليج واليمن</option><option value="levant">المشرق والعراق وتركيا</option><option value="nile">مصر والسودان وليبيا وتونس</option><option value="maghreb">المغرب العربي (مصر وليبيا وتونس والجزائر والمغرب)</option><option value="irg">الخليج والعراق وإيران</option><option value="x">أختار الدول بنفسي…</option></select></p><div id="mcu" style="display:none;line-height:2">${CNN.map((n,c)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="mc${c}" onchange="mapUi(1)" style="width:auto"> ${n}</label>`).join("")}</div><p>تفصيل المدن: <select id="mlv" onchange="mapUi(1)"><option value="2">سهل: مدينة لكل دولة</option><option value="1">متوسط: مدينتان</option><option value="0" selected>صعب: كل المدن</option></select> <span id="mcnt" style="color:var(--mut)"></span></p><p>تصنيفات الأسئلة: ${QCN.map((n,i)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="qc${i}" checked onchange="qcUi()" style="width:auto"> ${n}</label>`).join("")} <span id="qcnt" style="color:var(--mut)"></span></p><p>هدف الفوز: <select id="gt" style="width:auto" onchange="goalSync()"><option value="c" selected>احتلال مناطق (مدن)</option><option value="a">زيادة الجيوش</option><option value="k">احتلال العواصم ★</option></select> <select id="gs" style="width:auto" onchange="goalSync(this.value)"><option value="5">5 فوق ما تملك</option><option value="8">8 فوق ما تملك</option><option value="12" selected>12 فوق ما تملك</option><option value="20">20 فوق ما تملك</option><option value="all">كل المناطق</option><option value="x">رقم أختاره…</option></select> <input id="cn" type="number" value="10" min="1" max="500" style="width:60px;display:none"></p><p>عدد الجولات: <select id="mr" style="width:auto"><option>8</option><option>12</option><option selected>20</option><option>30</option><option>50</option><option value="0">لا نهائية</option></select></p>`;
-const GOALOPT={c:[["5","5 مناطق فوق ما تملك"],["8","8 مناطق فوق ما تملك"],["12","12 منطقة فوق ما تملك"],["20","20 منطقة فوق ما تملك"],["all","كل المناطق"],["x","رقم أختاره…"]],a:[["15","+15% من جيوشك عند البداية"],["30","+30% من جيوشك عند البداية"],["50","+50% من جيوشك عند البداية"],["100","+100% (ضعف جيوشك)"],["x","نسبة أختارها…"]],k:[["all","عواصم جميع اللاعبين"],["1","عاصمة واحدة من الخصوم"],["2","عاصمتان من الخصوم"],["3","3 عواصم من الخصوم"]]};
+const GOALOPT={c:[["all","كل المناطق"],["5","5 مناطق فوق ما تملك"],["8","8 مناطق فوق ما تملك"],["12","12 منطقة فوق ما تملك"],["20","20 منطقة فوق ما تملك"],["x","رقم أختاره…"]],a:[["A","تلقائي (يناسب حجم الخريطة وعدد اللاعبين)"],["F","أسرع (هدف أقل)"],["L","أطول (هدف أكبر)"],["x","عدد جيوش أختاره…"]],k:[["all","عواصم جميع اللاعبين"],["1","عاصمة واحدة من الخصوم"],["2","عاصمتان من الخصوم"],["3","3 عواصم من الخصوم"]]};
 function goalSync(keep){
  const t=$("gt"),g=$("gs");if(!t||!g)return;
- if(keep===undefined||!GOALOPT[t.value].some(o=>o[0]==keep)){const old=g.value;const same=GOALOPT[t.value].some(o=>o[0]==old)&&g.dataset.t==t.value;keep=same?old:(t.value=="c"?"12":t.value=="a"?"30":"all")}
+ if(keep===undefined||!GOALOPT[t.value].some(o=>o[0]==keep)){const old=g.value;const same=GOALOPT[t.value].some(o=>o[0]==old)&&g.dataset.t==t.value;keep=same?old:(t.value=="a"?"A":"all")}
  if(g.dataset.t!=t.value){g.innerHTML=GOALOPT[t.value].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");g.dataset.t=t.value}
  g.value=keep;const n=$("cn");if(n)n.style.display=g.value=="x"?"":"none";
+ homeUi();
 }
 function readMode(){
- const t=$("gt")?$("gt").value:"c",g=$("gs")?$("gs").value:"12";
+ const t=$("gt")?$("gt").value:"c",g=$("gs")?$("gs").value:"all";
  if(t=="k")return g=="all"?"cap":"k"+g;
  if(t=="c"&&g=="all")return "all";
- if(g=="x"){const v=Math.max(1,Math.min(t=="c"?40:300,parseInt($("cn")&&$("cn").value)||10));return(t=="a"?"p":t)+v}
- return(t=="a"?"p":t)+g;
+ if(g=="x"){const v=Math.max(1,Math.min(t=="c"?40:t=="a"?5000:300,parseInt($("cn")&&$("cn").value)||10));return(t=="a"?"r":t)+v}
+ return(t=="a"?"r":t)+g;
 }
-const OPTS=`<p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}${GOALH}`;
+const DET={};
+const SETUP=`<div class="gset">
+<p class="sh">١ · نوع الهدف</p>
+<div class="seg"><button type="button" id="sgc" onclick="setMode('c')">🗺 المناطق</button><button type="button" id="sgk" onclick="setMode('k')">★ العواصم</button><button type="button" id="sga" onclick="setMode('a')">⚔ الجيوش</button></div>
+<p class="sm" id="gsum"></p>
+<details id="dg" ontoggle="DET[this.id]=this.open"><summary>تعديل الهدف</summary><p>النوع: <select id="gt" style="width:auto" onchange="goalSync()"><option value="c" selected>احتلال مناطق</option><option value="k">احتلال العواصم ★</option><option value="a">جيوش</option></select> <select id="gs" style="width:auto" onchange="goalSync(this.value)"><option value="all" selected>كل المناطق</option><option value="5">5 مناطق فوق ما تملك</option><option value="8">8 مناطق فوق ما تملك</option><option value="12">12 منطقة فوق ما تملك</option><option value="20">20 منطقة فوق ما تملك</option><option value="x">رقم أختاره…</option></select> <input id="cn" type="number" value="10" min="1" max="5000" style="width:70px;display:none" oninput="homeUi()"></p></details>
+<p class="sh">٢ · الخريطة</p>
+<div class="seg"><button type="button" id="sl2" onclick="setLv(2)">سهلة</button><button type="button" id="sl1" onclick="setLv(1)">متوسطة</button><button type="button" id="sl0" onclick="setLv(0)">صعبة</button></div>
+<p class="sm"><span id="mcnt"></span> <span id="mdur"></span></p>
+<select id="mlv" style="display:none"><option value="2" selected>2</option><option value="1">1</option><option value="0">0</option></select>
+<details id="dm" ontoggle="DET[this.id]=this.open"><summary>اختيار الدول</summary><p>النطاق: <select id="msc" onchange="mapUi(1)"><option value="all">كل الدول</option><option value="gulf">الخليج واليمن</option><option value="levant">المشرق والعراق وتركيا</option><option value="nile">مصر والسودان وليبيا وتونس</option><option value="maghreb">المغرب العربي (مصر وليبيا وتونس والجزائر والمغرب)</option><option value="irg">الخليج والعراق وإيران</option><option value="x">أختار الدول بنفسي…</option></select></p><div id="mcu" style="display:none;line-height:2">${CNN.map((n,c)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="mc${c}" onchange="mapUi(1)" style="width:auto"> ${n}</label>`).join("")}</div></details>
+<p class="sh">٣ · الجولات</p>
+<p class="sm">عدد الجولات: <b id="rsum"></b></p>
+<details id="dr" ontoggle="DET[this.id]=this.open"><summary>تعديل عدد الجولات</summary><p><select id="mr" style="width:auto" onchange="homeUi()"><option value="0" selected>لا نهائية</option><option>8</option><option>12</option><option>20</option><option>30</option><option>50</option></select></p></details>
+<details id="da" ontoggle="DET[this.id]=this.open"><summary>خيارات متقدمة</summary>${BOTSH}<p>تصنيفات الأسئلة: ${QCN.map((n,i)=>`<label style="margin-inline-end:8px;white-space:nowrap"><input type="checkbox" id="qc${i}" checked onchange="qcUi()" style="width:auto"> ${n}</label>`).join("")} <span id="qcnt" style="color:var(--mut)"></span></p><p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p></details>
+</div>`;
+function goalTxt(){
+ const t=$("gt")?$("gt").value:"c",g=$("gs")?$("gs").value:"all",n=$("cn")?(+$("cn").value||10):10;
+ if(t=="c")return g=="all"?"الهدف: احتلال كل المناطق":"الهدف: احتلال "+(g=="x"?n:g)+((g=="x"?n:+g)>=3&&(g=="x"?n:+g)<=10?" مناطق":" منطقة")+" جديدة";
+ if(t=="k")return g=="all"?"الهدف: احتلال عواصم جميع اللاعبين":"الهدف: احتلال "+(g=="x"?n:g)+" من عواصم الخصوم";
+ return g=="x"?"الهدف: أن يصل أكبر جيش إلى "+n+" جيش":"الهدف: أن يصل أكبر جيش إلى العدد المحدد ("+({A:"تلقائي",F:"أسرع",L:"أطول"}[g]||"")+"، يُحسب من حجم الخريطة وعدد اللاعبين)";
+}
+function durHint(){
+ const t=$("gt")?$("gt").value:"c",g=$("gs")?$("gs").value:"all",l=$("mlv")?+$("mlv").value:2,mr=$("mr")?+$("mr").value:0;
+ if(mr)return"";
+ if(t=="a"&&g=="A")return l==2?"· مباراة قصيرة (نحو 20 جولة)":l==1?"· مباراة متوسطة (نحو 20 جولة)":"· مباراة أطول (نحو 25 جولة)";
+ if(g!="all")return"";
+ return l==2?"· مباراة قصيرة (نحو 15 جولة)":l==1?"· مباراة طويلة (نحو 45 جولة)":"· مباراة طويلة جداً (نحو 55 جولة)";
+}
+function homeUi(){
+ const t=$("gt"),l=$("mlv");
+ ["c","k","a"].forEach(x=>{const b=$("sg"+x);if(b)b.classList[t&&t.value==x?"add":"remove"]("on")});
+ [2,1,0].forEach(x=>{const b=$("sl"+x);if(b)b.classList[l&&+l.value==x?"add":"remove"]("on")});
+ const a=$("gsum");if(a)a.textContent=goalTxt();
+ const r=$("rsum"),m=$("mr");if(r&&m)r.textContent=+m.value?m.value:"لا نهائية";
+ const d=$("mdur");if(d)d.textContent=durHint();
+}
+function setMode(t){const g=$("gt");if(!g)return;g.value=t;goalSync(t=="a"?"A":"all")}
+function setLv(v){const m=$("mlv");if(!m)return;m.value=String(v);mapUi(1);homeUi()}
+const OPTS=`${SETUP}`;
 function bcast(){
  if(NET.role!="host"||!S)return;
  S.sq=(S.sq||0)+1;const o=JSON.parse(JSON.stringify(S));
@@ -592,7 +633,7 @@ function lost(why){
 NET.log=[];
 function nlog(m){try{NET.log.push([Date.now(),m]);if(NET.log.length>14)NET.log.shift()}catch(e){}}
 const logTxt=()=>NET.log.slice(-7).map(x=>new Date(x[0]).toISOString().slice(14,19)+" "+x[1]).join("<br>");
-const APPV="2.6 · 2026-11-02";
+const APPV="2.7 · 2026-11-03";
 function diagText(){
  const L=[];const a=(k,v)=>L.push(k+": "+v);
  a("الإصدار",APPV);a("الوقت",new Date().toISOString());
@@ -802,6 +843,7 @@ function start(n,o){
  shuf(rest).forEach(t=>{const cs=[...Array(n).keys()].map(cnt),mn=Math.min(...cs);S.T[t]=shuf([...Array(n).keys()].filter(p=>cs[p]==mn))[0]});
  S.lv=Array(n).fill(S.diff);S.pw=S.lv.map(l=>[.42,.6,.78][l]+(Math.random()-.5)*.16);S.hum=S.bots.map(b=>!b);S.pr=o&&o.pr?o.pr.slice():Array.from({length:n},()=>{const v=$("bp")?$("bp").value:"r";return v=="r"?Math.floor(Math.random()*3):+v});
  S.i0=[...Array(n).keys()].map(cnt);S.ia=[...Array(n).keys()].map(armies);
+ if(S.mode[0]=="r"){const L=S.mode.slice(1),avg=S.ia.reduce((a,b)=>a+b,0)/S.n,fac={A:2.2,F:1.6,L:3}[L];let X=fac?Math.ceil(fac*avg):+L;const need=Math.ceil(1.2*Math.max(...S.ia))+1;if(!(X>=need))X=need;S.mode="r"+X}
  if(/^c\d+$/.test(S.mode)){const mx=Math.max(2,Math.floor((N-Math.ceil(N/n))*.75));if(+S.mode.slice(1)>mx)S.mode="c"+mx}
 if(S.mode[0]=="k")S.mode="k"+Math.max(1,Math.min(+S.mode.slice(1),n-1));
 S.names=o&&o.names?o.names.slice():(()=>{const l=$("lnm")?$("lnm").value.split(/[،,]/).map(clean):[];return Array.from({length:n},(_,p)=>NET.role=="host"?clean((NET.names||[])[p]):(l[p]||""))})();
@@ -955,8 +997,8 @@ function atk(n){
  if(S.multi&&NET.role=="host"&&S.ph!="end"&&!alive(S.hs))setTimeout(hostXfer,400);
 }
 const armies=p=>S.A.reduce((s,a,i)=>s+(S.T[i]==p?a:0),0);
-function goal(){const m=S.mode,n=m.slice(1);return m=="all"?"احتلال جميع المناطق الـ"+N:m=="cap"?"احتلال عواصم جميع اللاعبين ★":m[0]=="k"?(n==1?"احتلال عاصمة واحدة":n==2?"احتلال عاصمتين":"احتلال "+n+" عواصم")+" من عواصم الخصوم ★":m[0]=="c"?"احتلال "+n+" مناطق جديدة فوق ما تملكه عند البداية":m[0]=="p"?"رفع جيوشك "+n+"% فوق ما بدأت به":"زيادة جيوشك "+n+" فوق ما بدأت به"}
-function won(p){const m=S.mode,n=+m.slice(1);return m=="all"?cnt(p)==N:m=="cap"?S.cap.every(c=>S.T[c]==p):m[0]=="k"?S.cap.filter((c,q)=>q!=p&&S.T[c]==p).length>=n:m[0]=="c"?cnt(p)>=S.i0[p]+n:m[0]=="p"?armies(p)>=Math.ceil(S.ia[p]*(1+n/100)):armies(p)>=S.ia[p]+n}
+function goal(){const m=S.mode,n=m.slice(1);return m=="all"?"احتلال جميع المناطق الـ"+N:m=="cap"?"احتلال عواصم جميع اللاعبين ★":m[0]=="k"?(n==1?"احتلال عاصمة واحدة":n==2?"احتلال عاصمتين":"احتلال "+n+" عواصم")+" من عواصم الخصوم ★":m[0]=="c"?"احتلال "+n+" مناطق جديدة فوق ما تملكه عند البداية":m[0]=="r"?"الوصول إلى "+n+" جيش":m[0]=="p"?"رفع جيوشك "+n+"% فوق ما بدأت به":"زيادة جيوشك "+n+" فوق ما بدأت به"}
+function won(p){const m=S.mode,n=+m.slice(1);return m=="all"?cnt(p)==N:m=="cap"?S.cap.every(c=>S.T[c]==p):m[0]=="k"?S.cap.filter((c,q)=>q!=p&&S.T[c]==p).length>=n:m[0]=="c"?cnt(p)>=S.i0[p]+n:m[0]=="r"?armies(p)>=n:m[0]=="p"?armies(p)>=Math.ceil(S.ia[p]*(1+n/100)):armies(p)>=S.ia[p]+n}
 function win(){
  if(S.hum&&![...Array(S.n).keys()].some(p=>alive(p)&&S.hum[p])){finish();return true}
  for(let p=0;p<S.n;p++)if(alive(p)&&won(p)){finish(p);return true}
@@ -1049,10 +1091,10 @@ function render(){if(S&&S.map)buildMap(S.map);const e=$("gv"),v=e?e.value:"",f0=
 function render0(){
  const app=$("app");DOCK="";
  if(!S&&NET.role)return lobby();
- if(!S){app.innerHTML=`<div class="side"><div class="card"><h2>صراع الأرض</h2><p>جيوشك تأتيك من معرفتك.</p><p><label><input type="checkbox" id="tmc" checked style="width:auto"> تفعيل التوقيت لكل مرحلة</label></p><p>الأزمنة بالثواني: سؤال <input id="tq" type="number" value="30" min="5" max="600" style="width:56px"> نتيجة <input id="tr" type="number" value="20" min="5" max="600" style="width:56px"> توزيع <input id="td" type="number" value="45" min="5" max="600" style="width:56px"> هجوم <input id="ta" type="number" value="60" min="5" max="600" style="width:56px"> تمركز <input id="tf" type="number" value="30" min="5" max="600" style="width:56px"></p>${BOTSH}${GOALH}${NAMEH()}<p>أسماء لاعبي اللعب المحلي (اختياري، افصل بفاصلة): <input id="lnm" style="width:100%"></p><p>عدد اللاعبين الكلي: <select id="pn" style="width:auto">${[2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select></p><button onclick="start(+$('pn').value)">ابدأ اللعب</button><hr><p>أو العب أونلاين على عدة أجهزة:</p><button class="s" onclick="host()">إنشاء غرفة</button> <input id="rc" placeholder="كود الغرفة" style="width:100px"> <button class="s" onclick="join($('rc').value)">انضمام</button></div></div><div class="mapw">${(S={T:R.map((_,i)=>i%4),A:R.map(()=>"")},mapSvg())}</div>`;S=null;return}
+ if(!S){app.innerHTML=`<div class="side"><div class="card"><h2>صراع الأرض</h2><p>جيوشك تأتيك من معرفتك.</p>${SETUP}${NAMEH()}<p>أسماء لاعبي اللعب المحلي (اختياري، افصل بفاصلة): <input id="lnm" style="width:100%"></p><p>عدد اللاعبين الكلي: <select id="pn" style="width:auto">${[2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join("")}</select></p><button onclick="start(+$('pn').value)">ابدأ اللعب</button><hr><p>أو العب أونلاين على عدة أجهزة:</p><button class="s" onclick="host()">إنشاء غرفة</button> <input id="rc" placeholder="كود الغرفة" style="width:100px"> <button class="s" onclick="join($('rc').value)">انضمام</button></div></div><div class="mapw">${(S={T:R.map((_,i)=>i%4),A:R.map(()=>"")},mapSvg())}</div>`;S=null;return}
  if(S.ph=="end"){if(lastEnd!=S.r+"w"){lastEnd=S.r+"w";SND.win()}app.innerHTML=`<div class="side"><div class="card">${endStats()}${NET.role=="client"?`<p style="color:var(--mut)">بانتظار المضيف لبدء جولة جديدة…</p><button class="s" onclick="leave()">خروج</button>`:`<button onclick="rematch()">🔁 جولة جديدة بنفس اللاعبين</button><button class="s" onclick="leave()">لعبة جديدة بإعدادات أخرى</button>`}</div></div>${mapw()}`;return}
  const key=S.ph+S.cur+S.gi+S.r;if(S.key!=key){S.key=key;S.t=L()[S.ph]||0;askSkip=false}
- const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" data-s="${SYM[i]}" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="k"?" · عواصم محتلة "+S.cap.filter((c,q)=>q!=i&&S.T[c]==i).length:S.mode=="cap"||S.mode=="all"?"":S.mode[0]=="p"?" · زيادة "+Math.round(100*(armies(i)/Math.max(1,S.ia[i])-1))+"%":S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
+ const p=S.P[S.cur],my=(!S.multi||S.cur==NET.seat)&&!(S.bots&&S.bots[S.cur]);let modal="",h=`<div class="card"><h3>الجولة ${S.r} من ${S.max||"∞"}</h3><div class="ph">🎯 ${goal()}</div><div class="ph">${PH.map(x=>x[0]==S.ph?"<b>"+x[1]+"</b>":x[1]).join(" ‹ ")}</div>`+S.P.map((q,i)=>!alive(i)?"":`<div class="pr" style="border-color:${S.ph!="q"&&S.ph!="qr"&&S.cur==i?PC[i]:'var(--bd)'}"><span class="dot" data-s="${SYM[i]}" style="background:${PC[i]}"></span><b>${nm(i)}</b>${S.champ&&S.champ.includes(i)&&S.ph!="q"&&S.ph!="qr"?" 🏅":""} · 🏰 ${cnt(i)} · ⚔ احتياطي ${q.res}${S.mode[0]=="k"?" · عواصم محتلة "+S.cap.filter((c,q)=>q!=i&&S.T[c]==i).length:S.mode=="cap"||S.mode=="all"?"":S.mode[0]=="r"?" · جيوش "+armies(i)+"/"+S.mode.slice(1):S.mode[0]=="p"?" · زيادة "+Math.round(100*(armies(i)/Math.max(1,S.ia[i])-1))+"%":S.mode[0]=="a"?" · زيادة "+(armies(i)-S.ia[i]):S.mode[0]=="c"?" · جديد "+(cnt(i)-S.i0[i]):""}${S.cap?"<br>👑 عاصمته: "+R[S.cap[i]].n:""}${stripX(i)}</div>`).join("")+`</div>`;
  if(S.multi&&NET.role&&S.bots&&S.bots[NET.seat]&&S.away&&S.away[NET.seat])h=`<div class="card"><p>🤖 الحاسوب يلعب نيابةً عنك لأنك غبت دورين.</p><button onclick="act('resume')">▶ إكمال اللعبة</button></div>`+h;
  if(NET.role=="client"&&S.multi&&(NET.mig||!NET.fresh))h=`<div class="card"><p>⏳ ${NET.mig?"انقطع الاتصال بالمضيف — جارٍ العودة إلى اللعبة...":"جارٍ استعادة اللعبة من المضيف..."}</p></div>`+h;
  const h0=h;
