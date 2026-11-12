@@ -656,6 +656,8 @@ const isStandalone=()=>{try{return matchMedia("(display-mode: standalone)").matc
 try{const base=/^https?:/.test(location.protocol)?location.origin+location.pathname:location.href.split("#")[0];
  const mf={name:"صراع الأرض",short_name:"صراع الأرض",description:"لعبة استراتيجية معرفية: أجب عن الأسئلة الرقمية واحتل الخريطة",lang:"ar",dir:"rtl",display:"standalone",orientation:Math.min(screen.width,screen.height)<600?"portrait":"landscape",background_color:"#0d1a20",theme_color:"#0f6b6b",start_url:base,scope:base.replace(/[^/]*$/,""),icons:[{src:ICON192,sizes:"192x192",type:"image/png",purpose:"any"}]};
  const l=document.createElement("link");l.rel="manifest";l.href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:"application/manifest+json"}));document.head.appendChild(l)}catch(e){}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(r=>{const w=r.active||navigator.serviceWorker.controller;if(w)w.postMessage({t:"precache",page:location.origin+location.pathname})}).catch(()=>{})}
+window.addEventListener("offline",()=>{try{note("لا يوجد إنترنت: اللعب المحلي متاح، واللعب الأونلاين يحتاج اتصالاً")}catch(e){}});
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();instEv=e});
 window.addEventListener("appinstalled",()=>{instEv=null;try{note("تم تثبيت اللعبة على جهازك ✅")}catch(e){}});
 function closeInst(){const d=document.getElementById("instm");if(d)d.remove()}
@@ -670,7 +672,7 @@ function installApp(){
  else st="<ol><li>في <b>Chrome</b> أو <b>Edge</b> اضغط أيقونة التثبيت <b>⊕</b> في شريط العنوان، أو من القائمة اختر <b>«تثبيت صراع الأرض»</b>.</li><li>في <b>Safari</b> (ماك): ملف ← <b>إضافة إلى Dock</b>.</li></ol>";
  closeInst();const d=document.createElement("div");d.id="instm";d.className="mod";d.onclick=e=>{if(e.target==d)closeInst()};
  d.innerHTML=`<div class="mc an hlp"><h3>📲 تثبيت اللعبة على الشاشة الرئيسية</h3>${st}<p style="color:var(--mut);font-size:12px">بعد التثبيت تفتح اللعبة بملء الشاشة كأي تطبيق. اللعب الأونلاين يحتاج اتصالاً بالإنترنت.</p><button class="s" onclick="closeInst()">إغلاق</button></div>`;document.body.appendChild(d)}
-const APPV="2.8.1 · 2026-11-12";
+const APPV="2.9 · 2026-11-12";
 function diagText(){
  const L=[];const a=(k,v)=>L.push(k+": "+v);
  a("الإصدار",APPV);a("الوقت",new Date().toISOString());
